@@ -1,0 +1,372 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "QSO Logging Rate (per second)",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "sum(rate(radioledger_qsos_logged_total[5m]))",
+          "legendFormat": "QSOs/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "ADIF Import Duration p95 (s)",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(radioledger_adif_import_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "HTTP Error Rate",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "targets": [
+        {
+          "expr": "sum(rate(radioledger_http_requests_total{status=~\"5..\"}[5m])) / clamp_min(sum(rate(radioledger_http_requests_total[5m])), 1)",
+          "legendFormat": "5xx ratio",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Sync Services",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 8}
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Sync Queue Depth per Service",
+      "description": "Current depth of the River job queue broken down by sync service (qrz, eqsl, clublog, lotw). Metric: river_queue_depth{service}",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 9},
+      "targets": [
+        {
+          "expr": "river_queue_depth{service=\"qrz\"}",
+          "legendFormat": "QRZ",
+          "refId": "A"
+        },
+        {
+          "expr": "river_queue_depth{service=\"eqsl\"}",
+          "legendFormat": "eQSL",
+          "refId": "B"
+        },
+        {
+          "expr": "river_queue_depth{service=\"lotw\"}",
+          "legendFormat": "LoTW",
+          "refId": "C"
+        },
+        {
+          "expr": "river_queue_depth{service=\"clublog\"}",
+          "legendFormat": "ClubLog",
+          "refId": "D"
+        },
+        {
+          "expr": "river_queue_depth{service=\"other\"}",
+          "legendFormat": "Other",
+          "refId": "E"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Sync Job Duration per Service (p50 / p95 / p99)",
+      "description": "River job execution duration percentiles by sync service. Metric: river_job_duration_seconds",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 9},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(river_job_duration_seconds_bucket[5m])) by (le, service))",
+          "legendFormat": "p50 {{service}}",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(river_job_duration_seconds_bucket[5m])) by (le, service))",
+          "legendFormat": "p95 {{service}}",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(river_job_duration_seconds_bucket[5m])) by (le, service))",
+          "legendFormat": "p99 {{service}}",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Sync Job Failure Rate per Service",
+      "description": "Rate of River job failures by sync service. Metric: river_job_failures_total{service}",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 17},
+      "targets": [
+        {
+          "expr": "rate(river_job_failures_total{service=\"qrz\"}[5m])",
+          "legendFormat": "QRZ",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(river_job_failures_total{service=\"eqsl\"}[5m])",
+          "legendFormat": "eQSL",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(river_job_failures_total{service=\"lotw\"}[5m])",
+          "legendFormat": "LoTW",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(river_job_failures_total{service=\"clublog\"}[5m])",
+          "legendFormat": "ClubLog",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "stat",
+      "title": "Circuit Breaker State per Service",
+      "description": "Circuit breaker state per sync service (0=ok, 1=rate_limited, 2=circuit_open). Awaits Prometheus instrumentation of radioledger_circuit_breaker_state — circuit state is currently stored in the sync_circuit_state Postgres table.",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 17},
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {"options": {"0": {"color": "green", "index": 0, "text": "ok"}}, "type": "value"},
+            {"options": {"1": {"color": "yellow", "index": 1, "text": "rate_limited"}}, "type": "value"},
+            {"options": {"2": {"color": "red", "index": 2, "text": "circuit_open"}}, "type": "value"}
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "red", "value": 2}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "radioledger_circuit_breaker_state{service=\"qrz\"}",
+          "legendFormat": "QRZ",
+          "refId": "A"
+        },
+        {
+          "expr": "radioledger_circuit_breaker_state{service=\"eqsl\"}",
+          "legendFormat": "eQSL",
+          "refId": "B"
+        },
+        {
+          "expr": "radioledger_circuit_breaker_state{service=\"lotw\"}",
+          "legendFormat": "LoTW",
+          "refId": "C"
+        },
+        {
+          "expr": "radioledger_circuit_breaker_state{service=\"clublog\"}",
+          "legendFormat": "ClubLog",
+          "refId": "D"
+        }
+      ]
+    },
+
+    {
+      "id": 20,
+      "type": "row",
+      "title": "River Workers",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 25}
+    },
+    {
+      "id": 21,
+      "type": "stat",
+      "title": "River Queue Depth (Total)",
+      "description": "Total depth of the River job queue across all states (available, scheduled, retryable, running). Metric: radioledger_river_queue_depth",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 26},
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 50},
+              {"color": "red", "value": 200}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "radioledger_river_queue_depth",
+          "legendFormat": "Queue Depth",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "timeseries",
+      "title": "River Jobs Processed per Minute",
+      "description": "Rate of River job completions across all services, scaled to per-minute. Derived from river_job_duration_seconds_count.",
+      "gridPos": {"h": 8, "w": 9, "x": 6, "y": 26},
+      "targets": [
+        {
+          "expr": "sum(rate(river_job_duration_seconds_count[1m])) by (service) * 60",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "type": "timeseries",
+      "title": "River Job Retry Rate",
+      "description": "Rate of River job failures per service — failures result in automatic River retries. Metric: river_job_failures_total{service}",
+      "gridPos": {"h": 8, "w": 9, "x": 15, "y": 26},
+      "targets": [
+        {
+          "expr": "sum(rate(river_job_failures_total[5m])) by (service)",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 30,
+      "type": "row",
+      "title": "Application Health",
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 34}
+    },
+    {
+      "id": 31,
+      "type": "stat",
+      "title": "Active Users Syncing",
+      "description": "Approximate number of authenticated users active in the last 5 minutes. Metric: radioledger_active_users",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 35},
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "blue", "value": null}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "radioledger_active_users",
+          "legendFormat": "Active Users",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "type": "timeseries",
+      "title": "API Request Latency (p50 / p95)",
+      "description": "HTTP request latency percentiles across all API routes. Metric: radioledger_http_request_duration_seconds",
+      "gridPos": {"h": 8, "w": 9, "x": 6, "y": 35},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(radioledger_http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(radioledger_http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "type": "timeseries",
+      "title": "Authentication Failures",
+      "description": "Rate of 4xx responses on auth-related API paths (/auth, /login, /register). Metric: radioledger_http_requests_total{path, status}",
+      "gridPos": {"h": 8, "w": 9, "x": 15, "y": 35},
+      "targets": [
+        {
+          "expr": "sum(rate(radioledger_http_requests_total{path=~\"/api/v1/auth.*|/api/v1/login.*|/api/v1/register.*\", status=~\"4..\"}[5m]))",
+          "legendFormat": "Auth 4xx/s",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(radioledger_http_requests_total{path=~\"/api/v1/auth.*|/api/v1/login.*|/api/v1/register.*\", status=\"401\"}[5m]))",
+          "legendFormat": "401 Unauthorized/s",
+          "refId": "B"
+        }
+      ]
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["radioledger", "observability"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "timezone": "",
+  "title": "RadioLedger Observability",
+  "uid": "radioledger-observability",
+  "version": 2,
+  "weekStart": ""
+}

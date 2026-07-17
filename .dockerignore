@@ -1,0 +1,24 @@
+# Keep Docker build context lean
+.git
+.gitignore
+docs/node_modules/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+desktop/*
+!desktop/package.json
+mobile/
+testdata/
+
+# Node artifacts (not needed for API build)
+web/node_modules/
+web/dist/
+
+# Go test/build artifacts
+api/server
+api/migrate-river
+**/*_test.go
+
+# Editor artifacts
+.DS_Store
+*.swp
+*.swo

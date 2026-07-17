@@ -1,0 +1,93 @@
+groups:
+  - name: radioledger-critical-alerts
+    rules:
+      - alert: SyncCircuitBreakerOpen
+        expr: max by (service) (radioledger_sync_circuit_open{job="radioledger-api"}) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Sync circuit breaker open for {{ $labels.service }}"
+          description: "The sync circuit breaker for service {{ $labels.service }} has been open for over 5 minutes."
+
+      - alert: RiverQueueDepthCritical
+        expr: radioledger_river_queue_depth{job="radioledger-api"} > 10000
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "River queue depth is critically high"
+          description: "River queue depth is {{ $value }} jobs, above the critical threshold of 10,000."
+
+      - alert: APIErrorRateHigh
+        expr: |
+          (
+            sum(rate(radioledger_http_requests_total{job="radioledger-api",status=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(radioledger_http_requests_total{job="radioledger-api"}[5m])), 1)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API 5xx error rate is above 5%"
+          description: "API 5xx error ratio has been above 5% for 5 minutes."
+
+      - alert: DatabasePoolExhausted
+        expr: |
+          radioledger_db_pool_acquired_connections{job="radioledger-api"}
+          >=
+          radioledger_db_pool_max_connections{job="radioledger-api"}
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection pool exhausted"
+          description: "All database pool connections are in use for over 5 minutes."
+
+  - name: radioledger-warning-alerts
+    rules:
+      - alert: RiverQueueDepthWarning
+        expr: radioledger_river_queue_depth{job="radioledger-api"} > 1000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "River queue depth is elevated"
+          description: "River queue depth is {{ $value }} jobs, above the warning threshold of 1,000."
+
+      - alert: SyncJobFailureRateHigh
+        expr: |
+          (
+            sum by (service) (increase(river_job_failures_total{job="radioledger-api"}[15m]))
+            /
+            clamp_min(sum by (service) (increase(river_job_duration_seconds_count{job="radioledger-api"}[15m])), 1)
+          ) > 0.2
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Sync job failure rate high for {{ $labels.service }}"
+          description: "Sync job failure rate for {{ $labels.service }} is above 20% over the last 15 minutes."
+
+      - alert: APILatencyP95High
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(radioledger_http_request_duration_seconds_bucket{job="radioledger-api"}[10m]))
+          ) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API p95 latency above 2 seconds"
+          description: "API p95 latency has been above 2 seconds for over 10 minutes."
+
+      - alert: WorkerTargetDown
+        expr: up{job="radioledger-api"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Worker scrape target is down"
+          description: "The radioledger-api scrape target has been down for more than 5 minutes."

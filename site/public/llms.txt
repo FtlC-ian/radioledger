@@ -1,0 +1,21 @@
+# RadioLedger
+> The open-source ledger for radio amateurs
+
+## About
+RadioLedger is an open-source, self-hostable ham radio logging platform.
+Run it yourself with Docker Compose.
+License: AGPLv3.
+
+## Docs
+- https://docs.radioledger.app/getting-started/
+- https://docs.radioledger.app/self-hosting/
+- https://docs.radioledger.app/api-reference/
+- https://docs.radioledger.app/adif-import-export/
+- https://docs.radioledger.app/desktop-client/
+- https://docs.radioledger.app/pota-sota/
+- https://docs.radioledger.app/federation/
+
+## API
+Base URL (self-hosted default): http://localhost:8080/v1
+Base URL (self-hosted): http://localhost:8080/v1
+Authentication: Bearer token (API key or JWT)

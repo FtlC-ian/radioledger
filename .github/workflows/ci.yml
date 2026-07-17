@@ -1,0 +1,226 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  go:
+    name: Go test, vet, and vulnerability scan
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5-alpine
+        env:
+          POSTGRES_USER: radioledger
+          POSTGRES_PASSWORD: ci_test_pw
+          POSTGRES_DB: radioledger
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U radioledger -d radioledger"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      RADIOLEDGER_TEST_DATABASE_URL: postgres://radioledger:ci_test_pw@localhost:5432/radioledger?sslmode=disable
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+          check-latest: true
+          cache-dependency-path: api/go.sum
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Apply and verify database migrations
+        run: |
+          (cd api && go run github.com/pressly/goose/v3/cmd/goose@v3.24.3 \
+            -dir ../database/migrations postgres "$RADIOLEDGER_TEST_DATABASE_URL" up)
+          (cd api && go run github.com/pressly/goose/v3/cmd/goose@v3.24.3 \
+            -dir ../database/migrations postgres "$RADIOLEDGER_TEST_DATABASE_URL" up)
+          expected_version="$(awk '/^const ExpectedGooseVersion int64 = / { print $NF }' \
+            api/internal/database/migrations/version.go)"
+          test -n "$expected_version"
+          test "$(PGPASSWORD=ci_test_pw psql -h localhost -U radioledger -d radioledger -Atc \
+            "SELECT max(version_id) FROM goose_db_version WHERE is_applied")" = "$expected_version"
+      - name: API vet and tests
+        working-directory: api
+        run: |
+          go vet ./...
+          go test ./...
+          go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+      - name: Shared Go module tests
+        run: |
+          (cd pkg/adif && go test ./...)
+          (cd pkg/gridsquare && go test ./...)
+          (cd pkg/plan && go test ./...)
+          (cd lotw-vault && go test ./...)
+
+  javascript:
+    name: Web, docs, and site checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter radioledger-web lint
+      - run: pnpm --filter radioledger-web test:unit
+      - run: pnpm --filter radioledger-web build
+      - run: pnpm --filter radioledger-docs docs:build
+      - run: pnpm --filter site build
+      - name: Production dependency audit
+        run: pnpm audit --prod --audit-level=high
+
+  web-e2e:
+    name: Web Playwright E2E
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5-alpine
+        env:
+          POSTGRES_USER: radioledger
+          POSTGRES_PASSWORD: ci_test_pw
+          POSTGRES_DB: radioledger
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U radioledger -d radioledger"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://radioledger:ci_test_pw@localhost:5432/radioledger?sslmode=disable
+      APP_ENV: development
+      AUTH_MODE: local
+      CORS_ALLOWED_ORIGINS: http://localhost:9000
+      PLAYWRIGHT_BASE_URL: http://localhost:9000
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure E2E encryption key
+        run: echo "RADIOLEDGER_MASTER_KEY=$(printf %s 'ci-e2e-test-master-key-32-bytes!' | base64)" >> "$GITHUB_ENV"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+          check-latest: true
+          cache-dependency-path: api/go.sum
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: pnpm --filter radioledger-web exec playwright install --with-deps chromium
+      - name: Apply E2E migrations and seed account
+        run: |
+          (cd api && go run github.com/pressly/goose/v3/cmd/goose@v3.24.3 \
+            -dir ../database/migrations postgres "$DATABASE_URL" up)
+          (cd api && go run github.com/pressly/goose/v3/cmd/goose@v3.24.3 \
+            -dir ../database/migrations postgres "$DATABASE_URL" up)
+          expected_version="$(awk '/^const ExpectedGooseVersion int64 = / { print $NF }' \
+            api/internal/database/migrations/version.go)"
+          test -n "$expected_version"
+          test "$(PGPASSWORD=ci_test_pw psql -h localhost -U radioledger -d radioledger -Atc \
+            "SELECT max(version_id) FROM goose_db_version WHERE is_applied")" = "$expected_version"
+          PGPASSWORD=ci_test_pw psql -h localhost -U radioledger -d radioledger \
+            -v ON_ERROR_STOP=1 -f database/seeds/002_test_users.sql
+      - name: Start API
+        run: |
+          (cd api && go run ./cmd/server > ../api-e2e.log 2>&1 &)
+          for _ in {1..30}; do
+            if curl --fail --silent --show-error http://localhost:9091/health; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat api-e2e.log
+          exit 1
+      - name: Start web app
+        run: |
+          (pnpm --filter radioledger-web dev -- --port 9000 > web-e2e.log 2>&1 &)
+          for _ in {1..30}; do
+            if curl --fail --silent --show-error http://localhost:9000 \
+              | grep --fixed-strings --quiet '<title>RadioLedger Web</title>'; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat web-e2e.log
+          exit 1
+      - name: Start docs app
+        run: |
+          (pnpm --filter radioledger-docs docs:dev --host 127.0.0.1 --port 9001 > docs-e2e.log 2>&1 &)
+          for _ in {1..30}; do
+            if curl --fail --silent --show-error http://localhost:9001/docs/; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat docs-e2e.log
+          exit 1
+      - name: Run app Playwright E2E suite
+        run: pnpm --filter radioledger-web exec playwright test --grep-invert "Docs Site"
+      - name: Run docs Playwright E2E suite
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:9001
+          PLAYWRIGHT_REUSE_AUTH: "1"
+        run: pnpm --filter radioledger-web exec playwright test docs-site.spec.ts
+      - name: Upload E2E diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-e2e-diagnostics
+          if-no-files-found: ignore
+          path: |
+            api-e2e.log
+            web-e2e.log
+            docs-e2e.log
+            web/playwright-report
+            web/test-results
+
+  desktop:
+    name: Desktop unit and Rust checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install desktop build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config libwebkit2gtk-4.1-dev \
+            libappindicator3-dev librsvg2-dev libgtk-3-dev libudev-dev
+      - run: pnpm install --frozen-lockfile --filter radioledger-desktop...
+      - run: pnpm --filter radioledger-desktop test:unit
+      - working-directory: desktop/src-tauri
+        run: cargo test

@@ -1,0 +1,102 @@
+[package]
+name = "radioledger-desktop"
+version = "0.1.0"
+edition = "2021"
+description = "RadioLedger desktop client — local shack integration, LoTW bridge, offline queue"
+authors = ["RadioLedger Contributors"]
+license = "AGPL-3.0-or-later"
+
+# Tauri requires the library target for plugin registration.
+[lib]
+name = "radioledger_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "radioledger-desktop"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[dependencies]
+# Tauri core + plugins
+tauri = { version = "=2.10.3", features = ["tray-icon", "image-ico", "image-png"] }
+tauri-plugin-shell = "=2.3.5"
+tauri-plugin-notification = "=2.3.3"
+tauri-plugin-single-instance = "=2.4.0"
+tauri-plugin-autostart = "=2.5.1"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = { version = "0.24", features = ["rustls-tls-webpki-roots"] }
+futures-util = "0.3"
+
+# SQLite (local cache for offline QSO queue; encryption via SQLCipher)
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# HTTP client (server sync)
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+
+# Crypto (PKCE + state param generation)
+rand = "0.8"
+sha2 = "0.10"
+base64 = "0.22"
+
+# OS keychain storage (macOS Keychain, Windows Credential Manager, libsecret)
+keyring = "3"
+
+# URL parsing
+url = "2"
+
+# UUID generation (client_uuid for dedup)
+uuid = { version = "1", features = ["v4"] }
+
+# Error handling
+anyhow = "1"
+thiserror = "2"
+
+# Logging
+tracing = "0.1"
+tracing-appender = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Home directory resolution
+dirs = "6"
+
+# Serial port enumeration (rig profiles)
+serialport = "4"
+
+# Config file (~/.radioledger/config.yaml)
+serde_yaml = "0.9"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Bytes (UDP packet parsing)
+bytes = "1"
+async-trait = "0.1"
+
+# Socket options for multicast (SO_REUSEADDR, SO_REUSEPORT, join_multicast_v4)
+socket2 = { version = "0.5", features = ["all"] }
+
+[target.'cfg(unix)'.dependencies]
+# Unix process signals (SIGTERM for rigctld shutdown)
+libc = "0.2"
+
+[features]
+# Enable custom protocol for frontend dev
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
+
+# Home directory resolution

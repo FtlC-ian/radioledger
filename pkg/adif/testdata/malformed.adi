@@ -1,0 +1,21 @@
+This file has various malformed inputs that must not crash the parser.
+
+Garbage text here: @#$%^&*()
+<ADIF_VER:5>3.1.4
+<EOH>
+
+<CALL:4>W1AW <BAND:3>20m <MODE:3>SSB <QSO_DATE:8>20260228 <TIME_ON:6>153000 <EOR>
+
+Garbage between records: @#$%^&*()
+
+Negative length (skipped):
+<CALL:-1>test <EOR>
+
+Empty field name (skipped):
+<:5>hello <EOR>
+
+Normal record after garbage:
+<CALL:5>K0ABC <BAND:3>40m <MODE:2>CW <QSO_DATE:8>20260228 <TIME_ON:6>200000 <EOR>
+
+Truncated tag at end of file (must not crash):
+<CALL:99999>truncated

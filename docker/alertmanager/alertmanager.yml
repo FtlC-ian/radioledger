@@ -1,0 +1,22 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: default-receiver
+  group_by: [alertname, service, severity]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+
+receivers:
+  - name: default-receiver
+    email_configs:
+      - to: alerts@example.com
+        from: radioledger-alerts@example.com
+        smarthost: smtp.example.com:587
+        auth_username: smtp-user
+        auth_password: smtp-password
+        require_tls: true
+    webhook_configs:
+      - url: https://example.com/alertmanager/webhook
+        send_resolved: true

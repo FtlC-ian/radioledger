@@ -1,0 +1,33 @@
+<script is:inline>
+	window.StarlightThemeProvider = (() => {
+		const storageKey = 'starlight-theme';
+		const storedValue =
+			typeof localStorage !== 'undefined' ? localStorage.getItem(storageKey) : null;
+
+		// Default to dark mode for first-time visitors.
+		if (typeof localStorage !== 'undefined' && storedValue === null) {
+			localStorage.setItem(storageKey, 'dark');
+		}
+
+		const resolvedStored =
+			typeof localStorage !== 'undefined' ? localStorage.getItem(storageKey) ?? 'dark' : 'dark';
+
+		const theme =
+			resolvedStored === 'light' || resolvedStored === 'dark'
+				? resolvedStored
+				: window.matchMedia('(prefers-color-scheme: light)').matches
+					? 'light'
+					: 'dark';
+
+		document.documentElement.dataset.theme = theme;
+
+		return {
+			updatePickers(pickerValue = resolvedStored === '' ? 'auto' : resolvedStored || 'dark') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = pickerValue;
+				});
+			},
+		};
+	})();
+</script>

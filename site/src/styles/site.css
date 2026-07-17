@@ -1,0 +1,321 @@
+:root {
+	/* RadioLedger dark-first palette */
+	--sl-color-accent-low: hsl(160, 48%, 16%);
+	--sl-color-accent: hsl(154, 72%, 45%);
+	--sl-color-accent-high: hsl(154, 72%, 80%);
+
+	--sl-color-black: hsl(222, 48%, 8%);
+	--sl-color-gray-6: hsl(220, 36%, 13%);
+	--sl-color-gray-5: hsl(219, 28%, 18%);
+	--sl-color-gray-4: hsl(218, 17%, 37%);
+	--sl-color-gray-3: hsl(214, 13%, 58%);
+	--sl-color-gray-2: hsl(210, 18%, 84%);
+	--sl-color-gray-1: hsl(210, 23%, 93%);
+
+	--sl-color-bg: hsl(222, 48%, 8%);
+	--sl-color-bg-nav: hsl(221, 41%, 11%);
+	--sl-color-bg-sidebar: hsl(221, 38%, 12%);
+	--sl-color-text: var(--sl-color-gray-2);
+	--sl-color-text-accent: var(--sl-color-accent-high);
+	--sl-color-hairline: hsl(220, 32%, 17%);
+	--sl-color-hairline-light: hsl(219, 26%, 20%);
+
+	color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+	/* Keep light mode usable for users who switch manually. */
+	--sl-color-accent-low: hsl(152, 50%, 90%);
+	--sl-color-accent: hsl(154, 76%, 35%);
+	--sl-color-accent-high: hsl(157, 72%, 20%);
+}
+
+/* Slightly cleaner docs chrome */
+header.site-title {
+	font-weight: 700;
+	letter-spacing: 0.01em;
+}
+
+/* Landing page styles */
+.rl-site {
+	margin: 0;
+	font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+		sans-serif;
+	background: hsl(222, 48%, 8%);
+	color: hsl(210, 23%, 93%);
+	min-height: 100vh;
+}
+
+.rl-container {
+	width: min(72rem, 92vw);
+	margin: 0 auto;
+}
+
+.rl-nav {
+	position: sticky;
+	top: 0;
+	z-index: 20;
+	background: hsl(221, 41%, 11%);
+	border-bottom: 1px solid hsl(219, 26%, 20%);
+}
+
+.rl-nav-inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.95rem 0;
+}
+
+.rl-brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.6rem;
+	color: inherit;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.rl-brand-mark {
+	width: 1.8rem;
+	height: 1.8rem;
+	border-radius: 0.35rem;
+	display: grid;
+	place-items: center;
+	font-size: 0.75rem;
+	font-weight: 800;
+	color: hsl(222, 48%, 8%);
+	background: hsl(154, 72%, 50%);
+}
+
+.rl-links {
+	display: inline-flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.rl-links a {
+	color: hsl(210, 20%, 83%);
+	text-decoration: none;
+	font-size: 0.95rem;
+}
+
+.rl-links a:hover {
+	color: white;
+}
+
+.rl-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem;
+	padding: 0.72rem 1.15rem;
+	border-radius: 0.7rem;
+	font-weight: 700;
+	text-decoration: none;
+	border: 1px solid transparent;
+	transition: background 140ms ease, border-color 140ms ease;
+}
+
+.rl-button:hover {
+	border-color: hsl(154, 48%, 36%);
+}
+
+.rl-button-primary {
+	color: hsl(222, 48%, 8%);
+	background: hsl(154, 72%, 50%);
+}
+
+.rl-button-secondary {
+	color: hsl(210, 23%, 93%);
+	background: hsl(220, 30%, 15%);
+	border-color: hsl(219, 26%, 25%);
+}
+
+.rl-hero {
+	display: grid;
+	grid-template-columns: minmax(0, 1.05fr) minmax(21rem, 0.8fr);
+	gap: 2rem;
+	align-items: center;
+	padding: 5.2rem 0 3rem;
+}
+
+.rl-hero-copy {
+	min-width: 0;
+}
+
+.rl-log-panel {
+	background: hsl(221, 42%, 8%);
+	border: 1px solid hsl(218, 26%, 24%);
+	border-radius: 0.55rem;
+	padding: 1rem;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+		'Courier New', monospace;
+}
+
+.rl-log-title {
+	margin-bottom: 0.75rem;
+	color: hsl(154, 72%, 72%);
+	font-weight: 800;
+}
+
+.rl-log-panel dl {
+	display: grid;
+	gap: 0.55rem;
+	margin: 0;
+}
+
+.rl-log-panel dl > div {
+	display: grid;
+	grid-template-columns: 5.5rem 1fr;
+	gap: 0.75rem;
+	padding-bottom: 0.55rem;
+	border-bottom: 1px solid hsl(220, 32%, 17%);
+}
+
+.rl-log-panel dl > div:last-child {
+	padding-bottom: 0;
+	border-bottom: 0;
+}
+
+.rl-log-panel dt {
+	color: hsl(214, 13%, 58%);
+}
+
+.rl-log-panel dd {
+	margin: 0;
+	color: hsl(210, 23%, 93%);
+}
+
+.rl-hero h1 {
+	margin: 0;
+	font-size: clamp(1.8rem, 3.8vw, 3.2rem);
+	line-height: 1.12;
+	max-width: 16ch;
+}
+
+.rl-tagline {
+	margin-top: 1rem;
+	font-size: clamp(1rem, 2vw, 1.3rem);
+	color: hsl(209, 18%, 82%);
+	max-width: 42ch;
+}
+
+.rl-cta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-top: 1.4rem;
+}
+
+.rl-section {
+	padding: 2.6rem 0;
+}
+
+.rl-grid {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr));
+}
+
+.rl-card {
+	background: hsl(220, 32%, 13%);
+	border: 1px solid hsl(220, 24%, 21%);
+	border-radius: 0.65rem;
+	padding: 1rem 1rem 1.1rem;
+}
+
+.rl-card h3 {
+	margin: 0 0 0.45rem;
+	font-size: 1.02rem;
+}
+
+.rl-card p {
+	margin: 0;
+	color: hsl(209, 12%, 77%);
+	font-size: 0.96rem;
+}
+
+.rl-cluster-grid {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.rl-cluster ul {
+	margin: 0.75rem 0 0;
+	padding-left: 1.15rem;
+	color: hsl(209, 12%, 77%);
+}
+
+.rl-cluster li + li {
+	margin-top: 0.55rem;
+}
+
+.rl-heading {
+	margin: 0 0 1rem;
+	font-size: clamp(1.3rem, 2.1vw, 1.9rem);
+}
+
+.rl-subheading {
+	margin: 0 0 1.3rem;
+	max-width: 62ch;
+	color: hsl(209, 12%, 77%);
+}
+
+.rl-code {
+	background: hsl(221, 42%, 8%);
+	border: 1px solid hsl(218, 26%, 24%);
+	border-radius: 0.55rem;
+	padding: 1rem;
+	overflow-x: auto;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+		'Courier New', monospace;
+	font-size: 0.9rem;
+	line-height: 1.5;
+	white-space: pre;
+}
+
+.rl-footer {
+	margin-top: 2rem;
+	padding: 1.6rem 0 2.5rem;
+	border-top: 1px solid hsl(220, 26%, 19%);
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.9rem;
+	color: hsl(209, 13%, 74%);
+}
+
+.rl-footer a {
+	color: hsl(210, 22%, 90%);
+	text-decoration: none;
+}
+
+.rl-license-badge {
+	display: inline-flex;
+	align-items: center;
+	border: 1px solid hsl(154, 48%, 36%);
+	border-radius: 0.45rem;
+	padding: 0.2rem 0.58rem;
+	font-size: 0.8rem;
+	color: hsl(154, 72%, 80%);
+}
+
+@media (max-width: 58rem) {
+	.rl-hero,
+	.rl-cluster-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 50rem) {
+	.rl-links a:not(.rl-button) {
+		display: none;
+	}
+
+	.rl-hero {
+		padding-top: 4.2rem;
+	}
+}

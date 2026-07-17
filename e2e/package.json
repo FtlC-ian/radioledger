@@ -1,0 +1,16 @@
+{
+  "name": "radioledger-e2e",
+  "version": "1.0.0",
+  "description": "E2E tests for RadioLedger",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.41.0",
+    "playwright": "^1.41.0"
+  }
+}

@@ -1,0 +1,383 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "gauge",
+      "title": "Active Connections",
+      "description": "Number of PostgreSQL backend connections currently active (state = active).",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 50},
+              {"color": "red", "value": 80}
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum(pg_stat_activity_count{state=\"active\"})",
+          "legendFormat": "Active",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "gauge",
+      "title": "Total Connections",
+      "description": "Total number of PostgreSQL backend connections (all states).",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 75},
+              {"color": "red", "value": 90}
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum(pg_stat_activity_count)",
+          "legendFormat": "Total",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "gauge",
+      "title": "Connection Pool — In Use",
+      "description": "pgxpool connections currently acquired by the API (from API pool metrics).",
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 15},
+              {"color": "red", "value": 25}
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "radioledger_db_pool_acquired_connections",
+          "legendFormat": "Acquired",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "gauge",
+      "title": "Cache Hit Ratio",
+      "description": "Percentage of data blocks served from shared_buffers (heap cache hit ratio across all user tables).",
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 90},
+              {"color": "green", "value": 99}
+            ]
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(pg_statio_user_tables_heap_blks_hit[5m])) / clamp_min(sum(rate(pg_statio_user_tables_heap_blks_hit[5m])) + sum(rate(pg_statio_user_tables_heap_blks_read[5m])), 1)",
+          "legendFormat": "Hit %",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Connection Pool — Open / Idle / Acquired",
+      "description": "pgxpool open, idle, and acquired connection counts over time (from API pool metrics).",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "fieldConfig": {
+        "defaults": {"unit": "short"},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "radioledger_db_pool_open_connections",
+          "legendFormat": "Open",
+          "refId": "A"
+        },
+        {
+          "expr": "radioledger_db_pool_idle_connections",
+          "legendFormat": "Idle",
+          "refId": "B"
+        },
+        {
+          "expr": "radioledger_db_pool_acquired_connections",
+          "legendFormat": "Acquired",
+          "refId": "C"
+        },
+        {
+          "expr": "radioledger_db_pool_max_connections",
+          "legendFormat": "Max (config)",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Active DB Connections (pg_stat_activity)",
+      "description": "PostgreSQL backend connections grouped by state.",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "fieldConfig": {
+        "defaults": {"unit": "short"},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "pg_stat_activity_count{state=\"active\"}",
+          "legendFormat": "active",
+          "refId": "A"
+        },
+        {
+          "expr": "pg_stat_activity_count{state=\"idle\"}",
+          "legendFormat": "idle",
+          "refId": "B"
+        },
+        {
+          "expr": "pg_stat_activity_count{state=\"idle in transaction\"}",
+          "legendFormat": "idle in txn",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Database Size",
+      "description": "Total size of each database in bytes.",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 14},
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {"unit": "decbytes"},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "pg_database_size_bytes",
+          "legendFormat": "{{datname}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Top Tables by Live Tuples",
+      "description": "Top 10 user tables by estimated live row count (pg_stat_user_tables.n_live_tup).",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 14},
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {"unit": "short"},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "topk(10, pg_stat_user_tables_n_live_tup)",
+          "legendFormat": "{{relname}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Top Tables by Dead Tuples",
+      "description": "Top 10 user tables by estimated dead row count — high values indicate VACUUM may be needed.",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 14},
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 10000},
+              {"color": "red", "value": 100000}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "topk(10, pg_stat_user_tables_n_dead_tup)",
+          "legendFormat": "{{relname}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Row Activity Rate — Inserts / Updates / Deletes",
+      "description": "Row-level write activity per second across all user tables.",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 22},
+      "fieldConfig": {
+        "defaults": {"unit": "ops"},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(pg_stat_user_tables_n_tup_ins[5m]))",
+          "legendFormat": "inserts/s",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(pg_stat_user_tables_n_tup_upd[5m]))",
+          "legendFormat": "updates/s",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(pg_stat_user_tables_n_tup_del[5m]))",
+          "legendFormat": "deletes/s",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cache Hit Ratio Over Time",
+      "description": "Heap block cache hit ratio over time (higher = better; target > 99%).",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 22},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 90},
+              {"color": "green", "value": 99}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(pg_statio_user_tables_heap_blks_hit[5m])) / clamp_min(sum(rate(pg_statio_user_tables_heap_blks_hit[5m])) + sum(rate(pg_statio_user_tables_heap_blks_read[5m])), 1)",
+          "legendFormat": "Cache hit %",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Pool Empty Waits (per second)",
+      "description": "Rate of times callers had to wait for a new connection because the pool was exhausted.",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 30},
+      "fieldConfig": {
+        "defaults": {"unit": "ops"},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "rate(radioledger_db_pool_empty_acquire_total[5m])",
+          "legendFormat": "Empty acquire waits/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Dead Tuple Accumulation Rate",
+      "description": "Rate of dead tuple growth per table — sustained growth without drops indicates VACUUM is falling behind.",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 30},
+      "fieldConfig": {
+        "defaults": {"unit": "short"},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "topk(5, rate(pg_stat_user_tables_n_dead_tup[10m]))",
+          "legendFormat": "{{relname}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["radioledger", "postgres", "database"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "PostgreSQL — pg_stat Dashboard",
+  "uid": "radioledger-postgres",
+  "version": 1
+}

@@ -1,0 +1,75 @@
+:root {
+  --rl-color-bg: #f3f4f7;
+  --rl-color-surface: #ffffff;
+  --rl-color-surface-soft: #f9fafb;
+  --rl-color-text: #1f2937;
+  --rl-color-text-muted: #6b7280;
+  --rl-color-border: rgba(15, 23, 42, 0.14);
+  --rl-color-hover: rgba(15, 23, 42, 0.04);
+  --rl-color-header-bg: #ffffff;
+  --rl-color-header-text: #1f2937;
+  --rl-color-sidebar-bg: #f8fafc;
+  --rl-color-sidebar-text: #1f2937;
+  --rl-color-sidebar-muted: #64748b;
+  --rl-color-sidebar-border: rgba(15, 23, 42, 0.1);
+  --rl-color-heatmap-empty: rgba(15, 23, 42, 0.06);
+  --rl-color-heatmap-cell-text: #0f172a;
+}
+
+body.body--light {
+  --rl-color-bg: #f3f4f7;
+  --rl-color-surface: #ffffff;
+  --rl-color-surface-soft: #f9fafb;
+  --rl-color-text: #1f2937;
+  --rl-color-text-muted: #6b7280;
+  --rl-color-border: rgba(15, 23, 42, 0.14);
+  --rl-color-hover: rgba(15, 23, 42, 0.04);
+  --rl-color-header-bg: #ffffff;
+  --rl-color-header-text: #1f2937;
+  --rl-color-sidebar-bg: #f8fafc;
+  --rl-color-sidebar-text: #1f2937;
+  --rl-color-sidebar-muted: #64748b;
+  --rl-color-sidebar-border: rgba(15, 23, 42, 0.1);
+  --rl-color-heatmap-empty: rgba(15, 23, 42, 0.06);
+  --rl-color-heatmap-cell-text: #0f172a;
+}
+
+body.body--dark {
+  --rl-color-bg: #111318;
+  --rl-color-surface: #1a1d24;
+  --rl-color-surface-soft: #212632;
+  --rl-color-text: #f5f7fa;
+  --rl-color-text-muted: #9aa4b2;
+  --rl-color-border: rgba(255, 255, 255, 0.12);
+  --rl-color-hover: rgba(255, 255, 255, 0.04);
+  --rl-color-header-bg: #161922;
+  --rl-color-header-text: #f5f7fa;
+  --rl-color-sidebar-bg: #141821;
+  --rl-color-sidebar-text: #e6ebf2;
+  --rl-color-sidebar-muted: #9aa4b2;
+  --rl-color-sidebar-border: rgba(255, 255, 255, 0.12);
+  --rl-color-heatmap-empty: rgba(255, 255, 255, 0.05);
+  --rl-color-heatmap-cell-text: #f5f7fa;
+}
+
+body {
+  background: var(--rl-color-bg);
+  color: var(--rl-color-text);
+}
+
+.q-page,
+.q-layout,
+.q-page-container {
+  background: var(--rl-color-bg);
+  color: var(--rl-color-text);
+}
+
+.q-card {
+  background: var(--rl-color-surface);
+  color: var(--rl-color-text);
+  border-color: var(--rl-color-border);
+}
+
+.q-table tbody tr:hover {
+  background: var(--rl-color-hover);
+}

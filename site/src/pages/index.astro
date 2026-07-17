@@ -1,0 +1,97 @@
+---
+import '../styles/site.css';
+
+const title = 'RadioLedger — Amateur radio logging that respects your log';
+const description = 'ADIF-faithful ham radio logging with WSJT-X desktop capture, QSL sync, award tracking, and a self-hostable stack.';
+const canonical = new URL('/', Astro.site ?? 'https://docs.radioledger.app').toString();
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content="https://docs.radioledger.app/og-radioledger.svg" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content="https://docs.radioledger.app/og-radioledger.svg" />
+	</head>
+	<body class="rl-site">
+		<header class="rl-nav">
+			<div class="rl-container rl-nav-inner">
+				<a class="rl-brand" href="/">
+					<span class="rl-brand-mark">RL</span>
+					<span>RadioLedger</span>
+				</a>
+				<nav class="rl-links" aria-label="Primary">
+					<a href="/docs/">Docs</a>
+					<a href="/api-reference/">API</a>
+					<a href="https://github.com/FtlC-ian/radioledger">GitHub</a>
+					<a class="rl-button rl-button-primary" href="/getting-started/">Get Started</a>
+				</nav>
+			</div>
+		</header>
+
+		<main class="rl-container">
+			<section class="rl-hero">
+				<div class="rl-hero-copy">
+					<h1>Amateur radio logging that respects your log</h1>
+					<p class="rl-tagline">ADIF-faithful logging, WSJT-X capture, QSL sync, and award tracking. Run it on infrastructure you control.</p>
+					<div class="rl-cta">
+						<a class="rl-button rl-button-primary" href="/getting-started/">Log your first QSO</a>
+						<a class="rl-button rl-button-secondary" href="/self-hosting/">Self-host with Docker</a>
+					</div>
+				</div>
+				<aside class="rl-log-panel" aria-label="Example QSO log row">
+					<div class="rl-log-title">Recent QSO</div>
+					<dl>
+						<div><dt>UTC</dt><dd>2026-06-04 19:32Z</dd></div>
+						<div><dt>Call</dt><dd>W1AW</dd></div>
+						<div><dt>Band / Mode</dt><dd>20m SSB</dd></div>
+						<div><dt>RST</dt><dd>59 sent · 57 received</dd></div>
+						<div><dt>QSL</dt><dd>LoTW pending · paper card queued</dd></div>
+					</dl>
+				</aside>
+			</section>
+
+			<section class="rl-section" aria-labelledby="features-heading">
+				<h2 id="features-heading" class="rl-heading">Built around operator workflows</h2>
+				<div class="rl-cluster-grid">
+					<article class="rl-card rl-cluster"><h3>Log</h3><ul><li>UTC-first QSO entry with callsign parsing and duplicate checks.</li><li>ADIF import/export that preserves portable calls, grids, awards, and QSL state.</li><li>Fast search for real operating sessions, not just dashboard charts.</li></ul></article>
+					<article class="rl-card rl-cluster"><h3>Sync</h3><ul><li>WSJT-X desktop capture for FT8/FT4 without cloud control of your station.</li><li>LoTW, QRZ, eQSL, Club Log, and lookup integrations stay helpers, not owners of your log.</li><li>Confirmation status remains visible until the service or paper-card workflow confirms it.</li></ul></article>
+					<article class="rl-card rl-cluster"><h3>Operate portable</h3><ul><li>POTA and SOTA flows track activations, references, and field logs.</li><li>DXCC, WAS, and VUCC views show worked versus confirmed gaps by band and mode.</li><li>Club and multi-operator logs are treated as station workflows, not generic teams.</li></ul></article>
+				</div>
+			</section>
+
+			<section class="rl-section" aria-labelledby="self-host-heading">
+				<h2 id="self-host-heading" class="rl-heading">Self-host for free</h2>
+				<p class="rl-subheading">
+					Run RadioLedger on your own server with Docker Compose. No external managed dependencies required.
+				</p>
+				<div class="rl-code">mkdir ~/radioledger && cd ~/radioledger
+git clone https://github.com/FtlC-ian/radioledger.git
+cd radioledger/docker
+./init.sh
+# review the generated .env and adjust optional settings
+docker compose up -d</div>
+			</section>
+
+			<footer class="rl-footer">
+				<div>
+					<a href="https://github.com/FtlC-ian/radioledger">GitHub</a>
+					&nbsp;·&nbsp;
+					<span class="rl-license-badge">AGPLv3</span>
+				</div>
+				<div>Built by hams, for hams.</div>
+			</footer>
+		</main>
+	</body>
+</html>

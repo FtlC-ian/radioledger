@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: RadioLedger
+    orgId: 1
+    folder: RadioLedger
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

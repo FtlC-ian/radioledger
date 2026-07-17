@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RadioLedger</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="app">
+
+    <!-- ── Header ─────────────────────────────────────────────────── -->
+    <header>
+      <div class="logo">
+        <img src="assets/logo-all-white.png" alt="RadioLedger" style="height: 40px;" />
+      </div>
+      <nav class="tab-bar" role="tablist">
+        <button class="tab-btn active" role="tab" aria-selected="true"
+                data-tab="shack" data-testid="tab-shack">Shack</button>
+        <button class="tab-btn" role="tab" aria-selected="false"
+                data-tab="log-qso" data-testid="tab-log-qso">Log QSO</button>
+        <button class="tab-btn" role="tab" aria-selected="false"
+                data-tab="log" data-testid="tab-log">Logbook</button>
+        <button class="tab-btn" role="tab" aria-selected="false"
+                data-tab="statistics" data-testid="tab-statistics">Statistics</button>
+        <button class="tab-btn" role="tab" aria-selected="false"
+                data-tab="settings" data-testid="tab-settings">Settings</button>
+      </nav>
+    </header>
+
+    <!-- ── Main content area ──────────────────────────────────────── -->
+    <main>
+
+      <!-- ═══ SHACK TAB (default) ═══════════════════════════════ -->
+      <div id="tab-content-shack" class="tab-content active" role="tabpanel">
+
+        <section class="status-cards">
+
+          <!-- Auth status -->
+          <div class="card" id="auth-card">
+            <h2>Authentication</h2>
+            <div class="status-row">
+              <span class="label">Status</span>
+              <span class="value" id="auth-status">Checking…</span>
+            </div>
+            <div class="status-row" id="callsign-row" style="display:none">
+              <span class="label">Callsign</span>
+              <span class="value" id="callsign-value">—</span>
+            </div>
+            <div class="status-row" id="server-url-row" style="display:none">
+              <span class="label">Server</span>
+              <span class="value" id="server-url-value">—</span>
+            </div>
+            <div class="card-actions">
+              <button id="login-btn">Login</button>
+              <button id="logout-btn" style="display:none">Logout</button>
+            </div>
+          </div>
+
+          <!-- UDP listener status — WSJT-X -->
+          <div class="card" id="udp-card">
+            <h2>WSJT-X / UDP Integration</h2>
+
+            <!-- WSJT-X -->
+            <h3 class="udp-source-heading">WSJT-X</h3>
+            <div class="status-row">
+              <span class="label">Listener</span>
+              <span class="value" id="udp-wsjtx-status" data-testid="udp-wsjtx-status">Checking…</span>
+            </div>
+            <div class="status-row">
+              <span class="label">Port</span>
+              <span class="value" id="udp-wsjtx-port" data-testid="udp-wsjtx-port">2237</span>
+            </div>
+            <div class="status-row">
+              <span class="label">Packets received</span>
+              <span class="value" id="udp-wsjtx-packets" data-testid="udp-wsjtx-packets">0</span>
+            </div>
+            <div class="card-actions">
+              <button id="udp-wsjtx-toggle-btn" data-testid="udp-wsjtx-toggle">Start Listener</button>
+            </div>
+
+            <!-- JS8Call -->
+            <h3 class="udp-source-heading">JS8Call</h3>
+            <div class="status-row">
+              <span class="label">Listener</span>
+              <span class="value" id="udp-js8call-status" data-testid="udp-js8call-status">Checking…</span>
+            </div>
+            <div class="status-row">
+              <span class="label">Port</span>
+              <span class="value" id="udp-js8call-port" data-testid="udp-js8call-port">2242</span>
+            </div>
+            <div class="status-row">
+              <span class="label">Packets received</span>
+              <span class="value" id="udp-js8call-packets" data-testid="udp-js8call-packets">0</span>
+            </div>
+            <div class="card-actions">
+              <button id="udp-js8call-toggle-btn" data-testid="udp-js8call-toggle">Start Listener</button>
+            </div>
+
+            <!-- N1MM+ -->
+            <h3 class="udp-source-heading">N1MM+</h3>
+            <div class="status-row">
+              <span class="label">Listener</span>
+              <span class="value" id="udp-n1mm-status" data-testid="udp-n1mm-status">Checking…</span>
+            </div>
+            <div class="status-row">
+              <span class="label">Port</span>
+              <span class="value" id="udp-n1mm-port" data-testid="udp-n1mm-port">12060</span>
+            </div>
+            <div class="status-row">
+              <span class="label">Packets received</span>
+              <span class="value" id="udp-n1mm-packets" data-testid="udp-n1mm-packets">0</span>
+            </div>
+            <div class="card-actions">
+              <button id="udp-n1mm-toggle-btn" data-testid="udp-n1mm-toggle">Start Listener</button>
+            </div>
+          </div>
+
+          <!-- Rig control status -->
+          <div class="card" id="rig-card">
+            <h2>Rig Control</h2>
+            <div class="status-row">
+              <span class="label">Connection</span>
+              <span class="value" id="rig-connection">Detecting…</span>
+            </div>
+            <div class="status-row">
+              <span class="label">Backend</span>
+              <span class="value" id="rig-backend">—</span>
+            </div>
+            <div class="status-row">
+              <span class="label">Frequency</span>
+              <button class="frequency-display" id="rig-frequency-display">---.---.---</button>
+            </div>
+            <div class="status-row">
+              <span class="label">Mode</span>
+              <span class="value" id="rig-mode">—</span>
+            </div>
+            <div class="status-row">
+              <span class="label">Band</span>
+              <span class="value" id="rig-band">—</span>
+            </div>
+            <div class="status-row">
+              <span class="label">S-meter</span>
+              <div class="smeter-wrap">
+                <div class="smeter-bar"><div id="rig-smeter-fill"></div></div>
+                <span class="value" id="rig-smeter-value">—</span>
+              </div>
+            </div>
+            <div class="status-row">
+              <span class="label">Power</span>
+              <span class="value" id="rig-power">—</span>
+            </div>
+            <div class="status-row" id="rig-error-row" style="display:none">
+              <span class="label">Last error</span>
+              <span class="value error" id="rig-error">—</span>
+            </div>
+            <div class="card-actions">
+              <button id="rig-refresh-btn">Refresh rig</button>
+            </div>
+          </div>
+
+          <!-- Sync status -->
+          <div class="card" id="sync-card">
+            <h2>Server Sync</h2>
+            <div class="status-row">
+              <span class="label">Pending QSOs</span>
+              <span class="value" id="sync-pending">—</span>
+            </div>
+            <div class="status-row">
+              <span class="label">Last sync</span>
+              <span class="value" id="sync-last">Never</span>
+            </div>
+            <div class="status-row" id="sync-error-row" style="display:none">
+              <span class="label">Last error</span>
+              <span class="value error" id="sync-error">—</span>
+            </div>
+            <div class="card-actions">
+              <button id="sync-now-btn">Sync Now</button>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- Recent activity log -->
+        <section class="log-section">
+          <h2>Recent activity</h2>
+          <div id="log-output"></div>
+        </section>
+
+      </div><!-- /tab-content-shack -->
+
+
+      <!-- ═══ LOG QSO TAB ═════════════════════════════════════════ -->
+      <div id="tab-content-log-qso" class="tab-content" role="tabpanel">
+        <section class="qso-entry-layout">
+          <div class="card qso-entry-card" id="qso-draft-card">
+            <div class="qso-entry-header">
+              <div>
+                <h2>Log QSO</h2>
+                <p class="qso-entry-subtitle">Manual entry with rig autofill and local callsign history.</p>
+              </div>
+              <div class="qso-entry-actions">
+                <button id="qso-log-btn" class="primary-btn">Queue QSO</button>
+                <button id="qso-clear-btn">Reset Form</button>
+              </div>
+            </div>
+
+            <div class="qso-form">
+              <div class="form-row qso-form-row-tight">
+                <div class="form-group form-group-wide">
+                  <label for="qso-callsign">Callsign *</label>
+                  <input id="qso-callsign" type="text" placeholder="W1AW" autocomplete="off" />
+                </div>
+                <div class="form-group form-group-wide">
+                  <label for="qso-datetime">Date/Time *</label>
+                  <input id="qso-datetime" type="datetime-local" />
+                </div>
+              </div>
+
+              <div id="qso-callsign-info" class="callsign-info" style="display:none">
+                <span id="qso-callsign-name" class="callsign-name"></span>
+                <span id="qso-callsign-location" class="callsign-location"></span>
+              </div>
+
+              <div class="form-row qso-form-row-3up">
+                <div class="form-group">
+                  <label for="qso-band">Band *</label>
+                  <select id="qso-band">
+                    <option value="">Select...</option>
+                    <option value="160m">160m</option>
+                    <option value="80m">80m</option>
+                    <option value="60m">60m</option>
+                    <option value="40m">40m</option>
+                    <option value="30m">30m</option>
+                    <option value="20m">20m</option>
+                    <option value="17m">17m</option>
+                    <option value="15m">15m</option>
+                    <option value="12m">12m</option>
+                    <option value="10m">10m</option>
+                    <option value="6m">6m</option>
+                    <option value="4m">4m</option>
+                    <option value="2m">2m</option>
+                    <option value="1.25m">1.25m</option>
+                    <option value="70cm">70cm</option>
+                    <option value="33cm">33cm</option>
+                    <option value="23cm">23cm</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="qso-frequency">Frequency (MHz)</label>
+                  <input id="qso-frequency" type="text" placeholder="14.074" />
+                </div>
+                <div class="form-group">
+                  <label for="qso-mode">Mode *</label>
+                  <select id="qso-mode">
+                    <option value="">Select...</option>
+                    <option value="SSB">SSB</option>
+                    <option value="CW">CW</option>
+                    <option value="FT8">FT8</option>
+                    <option value="FT4">FT4</option>
+                    <option value="RTTY">RTTY</option>
+                    <option value="PSK31">PSK31</option>
+                    <option value="AM">AM</option>
+                    <option value="FM">FM</option>
+                    <option value="DSTAR">D-STAR</option>
+                    <option value="DMR">DMR</option>
+                    <option value="C4FM">C4FM</option>
+                    <option value="JS8">JS8</option>
+                    <option value="WSPR">WSPR</option>
+                    <option value="SSTV">SSTV</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row qso-form-row-4up">
+                <div class="form-group">
+                  <label for="qso-rst-sent">RST Sent</label>
+                  <input id="qso-rst-sent" type="text" placeholder="59" maxlength="3" />
+                </div>
+                <div class="form-group">
+                  <label for="qso-rst-rcvd">RST Rcvd</label>
+                  <input id="qso-rst-rcvd" type="text" placeholder="59" maxlength="3" />
+                </div>
+                <div class="form-group">
+                  <label for="qso-power">Power (W)</label>
+                  <input id="qso-power" type="number" min="0" step="0.1" placeholder="100" />
+                </div>
+                <div class="form-group">
+                  <label for="qso-name">Name</label>
+                  <input id="qso-name" type="text" placeholder="Max" />
+                </div>
+              </div>
+
+              <div class="form-row qso-form-row-tight">
+                <div class="form-group form-group-wide">
+                  <label for="qso-qth">QTH</label>
+                  <input id="qso-qth" type="text" placeholder="Newington, CT" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group form-group-full">
+                  <label for="qso-notes">Notes</label>
+                  <textarea id="qso-notes" rows="4" placeholder="Signal notes, contest exchange, park reference, whatever matters."></textarea>
+                </div>
+              </div>
+
+              <div class="qso-form-actions qso-form-actions-inline">
+                <span id="qso-form-status"></span>
+              </div>
+            </div>
+
+            <div class="hint">Frequency auto-fills from rig control when available. RST defaults to 59 for phone and 599 for CW/data.</div>
+          </div>
+
+          <aside class="qso-sidebar">
+            <section class="card qso-decode-card" id="wsjtx-decode-panel">
+              <div class="qso-history-header">
+                <div>
+                  <h2>WSJT-X Live Decodes</h2>
+                  <p id="wsjtx-decode-count" class="qso-history-count">Listening for decodes…</p>
+                </div>
+                <span class="decode-source-pill">Live</span>
+              </div>
+              <div class="decode-legend">
+                <span class="decode-legend-item decode-legend-new">New / needed</span>
+                <span class="decode-legend-item decode-legend-worked">Worked</span>
+                <span class="decode-legend-item decode-legend-confirmed">Confirmed</span>
+              </div>
+              <div class="qso-history-table-wrap decode-table-wrap">
+                <table class="qso-history-table decode-table">
+                  <thead>
+                    <tr>
+                      <th>Message</th>
+                      <th>Grid</th>
+                      <th>Dist.</th>
+                      <th>SNR</th>
+                      <th>Last</th>
+                    </tr>
+                  </thead>
+                  <tbody id="wsjtx-decode-body"></tbody>
+                </table>
+              </div>
+              <p id="wsjtx-decode-empty" class="qso-history-empty">No recent WSJT-X decodes yet.</p>
+            </section>
+
+            <section class="card qso-history-card" id="qso-history-panel" style="display:none">
+              <div class="qso-history-header">
+                <div>
+                  <h2>Previous QSOs</h2>
+                  <p id="qso-history-count" class="qso-history-count">0 previous QSOs</p>
+                </div>
+              </div>
+              <div class="qso-history-table-wrap">
+                <table class="qso-history-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Band</th>
+                      <th>Mode</th>
+                    </tr>
+                  </thead>
+                  <tbody id="qso-history-body"></tbody>
+                </table>
+              </div>
+              <p id="qso-history-empty" class="qso-history-empty">Enter a callsign to see previous contacts.</p>
+            </section>
+          </aside>
+        </section>
+      </div>
+
+      <!-- ═══ LOG TAB ════════════════════════════════════════════ -->
+      <div id="tab-content-log" class="tab-content" role="tabpanel">
+        <div class="log-controls">
+          <div class="log-filters">
+            <input type="text" id="log-filter-callsign" placeholder="Filter callsign..." />
+            <select id="log-filter-band">
+              <option value="">All bands</option>
+              <option value="160m">160m</option>
+              <option value="80m">80m</option>
+              <option value="40m">40m</option>
+              <option value="20m">20m</option>
+              <option value="15m">15m</option>
+              <option value="10m">10m</option>
+              <option value="6m">6m</option>
+              <option value="2m">2m</option>
+            </select>
+            <select id="log-filter-mode">
+              <option value="">All modes</option>
+              <option value="SSB">SSB</option>
+              <option value="CW">CW</option>
+              <option value="FT8">FT8</option>
+              <option value="FT4">FT4</option>
+              <option value="RTTY">RTTY</option>
+              <option value="PSK31">PSK31</option>
+            </select>
+            <button id="log-apply-filters">Apply</button>
+            <button id="log-clear-filters">Clear</button>
+          </div>
+          <div class="log-toolbar">
+            <div class="log-stats">
+              <span id="log-total-count">0 QSOs</span>
+              <span id="log-filtered-count" style="display:none">0 filtered</span>
+            </div>
+            <div id="log-column-controls" class="log-column-controls">
+              <button id="log-columns-toggle" type="button" aria-haspopup="true" aria-expanded="false">⚙ Columns</button>
+              <div id="log-columns-menu" class="log-columns-menu" hidden>
+                <div class="log-columns-title">Visible columns</div>
+                <div id="log-columns-list" class="log-columns-list"></div>
+              </div>
+            </div>
+            <button id="log-refresh-btn">↻ Refresh</button>
+          </div>
+        </div>
+
+        <div class="log-table-container">
+          <table id="log-table" class="log-table">
+            <!-- Populated by JS -->
+          </table>
+        </div>
+
+        <div class="log-pagination">
+          <button id="log-prev-page" disabled>← Prev</button>
+          <span id="log-page-info">Page 1</span>
+          <button id="log-next-page">Next →</button>
+        </div>
+
+        <div id="log-empty-state" class="empty-state" style="display:none">
+          <p>No QSOs in the logbook yet. Make some contacts!</p>
+        </div>
+      </div>
+
+      <div id="log-edit-overlay" class="wizard-overlay log-edit-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="log-edit-title">
+        <div class="wizard-card log-edit-card">
+          <div class="qso-entry-header">
+            <div>
+              <h2 id="log-edit-title">Edit QSO</h2>
+              <p class="qso-entry-subtitle">Update the local record, then let sync push it back upstream.</p>
+            </div>
+            <div class="qso-entry-actions">
+              <button id="log-edit-hydrate-btn">Refresh Callsign Data</button>
+              <button id="log-edit-close-btn">Close</button>
+            </div>
+          </div>
+
+          <div class="qso-form">
+            <div class="form-row qso-form-row-tight">
+              <div class="form-group form-group-wide">
+                <label for="log-edit-callsign">Callsign *</label>
+                <input id="log-edit-callsign" type="text" />
+              </div>
+              <div class="form-group form-group-wide">
+                <label for="log-edit-datetime">Date/Time *</label>
+                <input id="log-edit-datetime" type="datetime-local" />
+              </div>
+            </div>
+
+            <div class="form-row qso-form-row-3up">
+              <div class="form-group">
+                <label for="log-edit-band">Band *</label>
+                <select id="log-edit-band">
+                  <option value="">Select...</option>
+                  <option value="160m">160m</option>
+                  <option value="80m">80m</option>
+                  <option value="60m">60m</option>
+                  <option value="40m">40m</option>
+                  <option value="30m">30m</option>
+                  <option value="20m">20m</option>
+                  <option value="17m">17m</option>
+                  <option value="15m">15m</option>
+                  <option value="12m">12m</option>
+                  <option value="10m">10m</option>
+                  <option value="6m">6m</option>
+                  <option value="4m">4m</option>
+                  <option value="2m">2m</option>
+                  <option value="1.25m">1.25m</option>
+                  <option value="70cm">70cm</option>
+                  <option value="33cm">33cm</option>
+                  <option value="23cm">23cm</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="log-edit-mode">Mode *</label>
+                <select id="log-edit-mode">
+                  <option value="">Select...</option>
+                  <option value="SSB">SSB</option>
+                  <option value="CW">CW</option>
+                  <option value="FT8">FT8</option>
+                  <option value="FT4">FT4</option>
+                  <option value="RTTY">RTTY</option>
+                  <option value="PSK31">PSK31</option>
+                  <option value="AM">AM</option>
+                  <option value="FM">FM</option>
+                  <option value="DSTAR">D-STAR</option>
+                  <option value="DMR">DMR</option>
+                  <option value="C4FM">C4FM</option>
+                  <option value="JS8">JS8</option>
+                  <option value="WSPR">WSPR</option>
+                  <option value="SSTV">SSTV</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="log-edit-grid">Grid Square</label>
+                <input id="log-edit-grid" type="text" />
+              </div>
+            </div>
+
+            <div class="form-row qso-form-row-4up">
+              <div class="form-group">
+                <label for="log-edit-rst-sent">RST Sent</label>
+                <input id="log-edit-rst-sent" type="text" maxlength="3" />
+              </div>
+              <div class="form-group">
+                <label for="log-edit-rst-rcvd">RST Rcvd</label>
+                <input id="log-edit-rst-rcvd" type="text" maxlength="3" />
+              </div>
+              <div class="form-group">
+                <label for="log-edit-name">Name</label>
+                <input id="log-edit-name" type="text" />
+              </div>
+              <div class="form-group">
+                <label for="log-edit-qth">QTH</label>
+                <input id="log-edit-qth" type="text" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group form-group-full">
+                <label for="log-edit-comment">Comment</label>
+                <textarea id="log-edit-comment" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group form-group-full">
+                <label for="log-edit-notes">Notes</label>
+                <textarea id="log-edit-notes" rows="4"></textarea>
+              </div>
+            </div>
+
+            <div class="qso-form-actions qso-form-actions-inline">
+              <span id="log-edit-status"></span>
+              <button id="log-edit-save-btn" class="primary-btn">Save & Queue Sync</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ═══ STATISTICS TAB ═════════════════════════════════════ -->
+      <div id="tab-content-statistics" class="tab-content" role="tabpanel">
+        <section class="stats-section" id="stats-section">
+          <div class="stats-header">
+            <h2>📊 Statistics Dashboard</h2>
+            <button id="stats-refresh-btn" class="stats-refresh-btn">↻ Refresh</button>
+          </div>
+
+          <div class="stats-kpis">
+            <div class="kpi-card"><span class="kpi-value" id="stat-total-qsos">—</span><span class="kpi-label">Total QSOs</span></div>
+            <div class="kpi-card"><span class="kpi-value" id="stat-unique-callsigns">—</span><span class="kpi-label">Callsigns Worked</span></div>
+            <div class="kpi-card"><span class="kpi-value" id="stat-unique-countries">—</span><span class="kpi-label">Countries</span></div>
+            <div class="kpi-card"><span class="kpi-value" id="stat-unique-states">—</span><span class="kpi-label">States</span></div>
+            <div class="kpi-card"><span class="kpi-value" id="stat-unique-grids">—</span><span class="kpi-label">Grid Squares</span></div>
+            <div class="kpi-card"><span class="kpi-value" id="stat-bands-used">—</span><span class="kpi-label">Bands Used</span></div>
+            <div class="kpi-card"><span class="kpi-value" id="stat-modes-used">—</span><span class="kpi-label">Modes Used</span></div>
+            <div class="kpi-card"><span class="kpi-value" id="stat-first-qso">—</span><span class="kpi-label">First QSO</span></div>
+            <div class="kpi-card"><span class="kpi-value" id="stat-last-qso">—</span><span class="kpi-label">Last QSO</span></div>
+          </div>
+
+          <div class="stats-charts-row">
+            <div class="stats-chart-card">
+              <h3>QSOs by Band</h3>
+              <canvas id="chart-band" height="220"></canvas>
+            </div>
+            <div class="stats-chart-card">
+              <h3>QSOs by Mode</h3>
+              <canvas id="chart-mode" height="220"></canvas>
+            </div>
+          </div>
+
+          <div class="stats-charts-row">
+            <div class="stats-chart-card">
+              <h3>QSOs over Time</h3>
+              <canvas id="chart-period" height="180"></canvas>
+            </div>
+            <div class="stats-chart-card">
+              <h3>Countries over Time</h3>
+              <canvas id="chart-cot" height="180"></canvas>
+            </div>
+          </div>
+
+          <div class="stats-full-card">
+            <h3>Operating Patterns (UTC)</h3>
+            <p class="stats-hint">Hour of day (00–23) vs. day of week — darker = more QSOs</p>
+            <div id="heatmap-container" class="heatmap-container">
+              <span class="stats-loading">Loading…</span>
+            </div>
+          </div>
+
+          <div class="stats-tables-row">
+            <div class="stats-table-card">
+              <h3>Top Callsigns</h3>
+              <table class="stats-table">
+                <thead><tr><th>#</th><th>Callsign</th><th>QSOs</th></tr></thead>
+                <tbody id="table-top-callsigns"><tr><td colspan="3" class="stats-loading">Loading…</td></tr></tbody>
+              </table>
+            </div>
+            <div class="stats-table-card">
+              <h3>Top Countries</h3>
+              <table class="stats-table">
+                <thead><tr><th>#</th><th>Country</th><th>QSOs</th></tr></thead>
+                <tbody id="table-top-countries"><tr><td colspan="3" class="stats-loading">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div><!-- /tab-content-statistics -->
+
+      <!-- ═══ SETTINGS TAB ═══════════════════════════════════════ -->
+      <div id="tab-content-settings" class="tab-content" role="tabpanel">
+        <section class="settings-section">
+
+          <!-- Server connection + UDP listeners (combined) -->
+          <div class="card" id="settings-server-card">
+            <h2>Server Connection</h2>
+
+            <!-- Auth mode toggle -->
+            <div class="status-row">
+              <span class="label">Mode</span>
+              <div class="wizard-auth-toggle" style="margin:0">
+                <button id="settings-auth-cloud-btn" class="wizard-toggle-btn active">☁️ Cloud</button>
+                <button id="settings-auth-local-btn" class="wizard-toggle-btn">🏠 Self-Hosted</button>
+              </div>
+            </div>
+
+            <div class="status-row">
+              <label class="label" for="settings-server-url">Server URL</label>
+              <input id="settings-server-url" class="inline-input settings-input"
+                     type="url" placeholder="https://radioledger.app" />
+            </div>
+
+            <!-- Local auth fields (shown only in self-hosted mode) -->
+            <div id="settings-local-auth-fields" style="display:none">
+              <div class="status-row">
+                <label class="label" for="settings-local-email">Email</label>
+                <input id="settings-local-email" class="inline-input settings-input"
+                       type="email" placeholder="you@example.com" />
+              </div>
+              <div class="status-row">
+                <label class="label" for="settings-local-password">Password</label>
+                <input id="settings-local-password" class="inline-input settings-input"
+                       type="password" placeholder="Password" />
+              </div>
+              <div class="status-row" id="settings-local-login-status-row" style="display:none">
+                <span class="label">Auth</span>
+                <span class="value" id="settings-local-login-status">—</span>
+              </div>
+            </div>
+
+            <div class="status-row" id="settings-connection-status-row">
+              <span class="label">Status</span>
+              <span class="value" id="settings-connection-status">—</span>
+            </div>
+            <div class="card-actions">
+              <button id="settings-save-server-btn">Save</button>
+              <button id="settings-test-connection-btn">Test Connection</button>
+              <button id="settings-local-login-btn" style="display:none">Sign In</button>
+            </div>
+
+            <!-- ── UDP Listeners subsection ───────────────────────── -->
+            <div class="udp-subsection" id="settings-udp-card">
+              <h3 class="udp-subsection-title">UDP Listeners</h3>
+
+              <!-- Three ports in a compact row -->
+              <div class="udp-ports-row">
+                <div class="udp-port-col">
+                  <label for="settings-udp-wsjtx-port">WSJT-X Port</label>
+                  <input id="settings-udp-wsjtx-port" class="inline-input" type="number"
+                         min="1024" max="65535" placeholder="2237"
+                         data-testid="settings-udp-wsjtx-port" />
+                </div>
+                <div class="udp-port-col">
+                  <label for="settings-udp-js8call-port">JS8Call Port</label>
+                  <input id="settings-udp-js8call-port" class="inline-input" type="number"
+                         min="1024" max="65535" placeholder="2242"
+                         data-testid="settings-udp-js8call-port" />
+                </div>
+                <div class="udp-port-col">
+                  <label for="settings-udp-n1mm-port">N1MM+ Port</label>
+                  <input id="settings-udp-n1mm-port" class="inline-input" type="number"
+                         min="1024" max="65535" placeholder="12060"
+                         data-testid="settings-udp-n1mm-port" />
+                </div>
+              </div>
+
+              <!-- Auto-start checkboxes -->
+              <div class="status-row">
+                <label class="label" for="settings-udp-wsjtx-auto-start">Start WSJT-X automatically on launch</label>
+                <input id="settings-udp-wsjtx-auto-start" type="checkbox"
+                       data-testid="settings-udp-wsjtx-auto-start" />
+              </div>
+              <div class="status-row">
+                <label class="label" for="settings-udp-js8call-auto-start">Start JS8Call automatically on launch</label>
+                <input id="settings-udp-js8call-auto-start" type="checkbox"
+                       data-testid="settings-udp-js8call-auto-start" />
+              </div>
+              <div class="status-row">
+                <label class="label" for="settings-udp-n1mm-auto-start">Start N1MM+ automatically on launch</label>
+                <input id="settings-udp-n1mm-auto-start" type="checkbox"
+                       data-testid="settings-udp-n1mm-auto-start" />
+              </div>
+
+              <div class="status-row">
+                <label class="label" for="settings-wsjtx-decode-panel-enabled">Live Decode Panel</label>
+                <input id="settings-wsjtx-decode-panel-enabled" type="checkbox"
+                       data-testid="settings-wsjtx-decode-panel-enabled" />
+              </div>
+              <div class="status-row">
+                <label class="label" for="settings-udp-ft8battle-relay">FT8Battle relay</label>
+                <input id="settings-udp-ft8battle-relay" type="checkbox"
+                       data-testid="settings-udp-ft8battle-relay" />
+              </div>
+              <div class="status-row">
+                <label class="label" for="settings-udp-wsjtx-multicast">Enable Multicast (WSJT-X)</label>
+                <input id="settings-udp-wsjtx-multicast" type="checkbox"
+                       data-testid="settings-udp-wsjtx-multicast" />
+              </div>
+              <div class="status-row" id="settings-udp-wsjtx-multicast-group-row" style="display:none">
+                <label class="label" for="settings-udp-wsjtx-multicast-group">Multicast Group</label>
+                <input id="settings-udp-wsjtx-multicast-group" class="inline-input" type="text"
+                       placeholder="224.0.0.73"
+                       data-testid="settings-udp-wsjtx-multicast-group" />
+              </div>
+
+              <div class="hint">Changes take effect after restarting the respective UDP listener.</div>
+              <div class="card-actions">
+                <button id="settings-save-udp-btn" data-testid="settings-save-udp">Save UDP Settings</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Rig Profiles (full-width) ────────────────────────── -->
+          <div class="card" id="settings-rig-card">
+            <h2>Rig Control Profiles</h2>
+            <div class="rig-profiles-layout">
+              <!-- Left: profile list -->
+              <div class="rig-profiles-sidebar">
+                <div class="rig-profiles-list" id="rig-profiles-list">
+                  <!-- Populated by JS -->
+                </div>
+                <div class="rig-profiles-sidebar-actions">
+                  <button id="rig-profile-add-btn" class="btn-small">+ Add Profile</button>
+                </div>
+              </div>
+              <!-- Right: profile config form -->
+              <div class="rig-profile-form" id="rig-profile-form" style="display:none">
+                <div class="status-row">
+                  <label class="label" for="rp-name">Profile Name</label>
+                  <input id="rp-name" class="inline-input" type="text" placeholder="My Rig" />
+                </div>
+                <div class="status-row">
+                  <label class="label" for="rp-interface">Interface</label>
+                  <select id="rp-interface" class="inline-input">
+                    <option value="hamlib">Hamlib (managed rigctld)</option>
+                    <option value="flrig">FLRig (XML-RPC)</option>
+                    <option value="external">External rigctld</option>
+                    <option value="tci">TCI (WebSocket)</option>
+                  </select>
+                </div>
+
+                <!-- Hamlib fields -->
+                <div id="rp-hamlib-fields">
+                  <div class="status-row">
+                    <label class="label" for="rp-rig-model">Rig Model</label>
+                    <select id="rp-rig-model" class="inline-input">
+                      <option value="">Loading…</option>
+                    </select>
+                  </div>
+                  <div class="status-row">
+                    <label class="label" for="rp-serial-port">Serial Port</label>
+                    <div class="input-with-btn">
+                      <select id="rp-serial-port" class="inline-input">
+                        <option value="">Select port…</option>
+                      </select>
+                      <button id="rp-refresh-ports-btn" class="btn-small">↻</button>
+                    </div>
+                  </div>
+                  <div class="status-row">
+                    <label class="label" for="rp-baud-rate">Baud Rate</label>
+                    <select id="rp-baud-rate" class="inline-input">
+                      <option value="4800">4800</option>
+                      <option value="9600" selected>9600</option>
+                      <option value="19200">19200</option>
+                      <option value="38400">38400</option>
+                      <option value="57600">57600</option>
+                      <option value="115200">115200</option>
+                    </select>
+                  </div>
+                  <!-- Data Bits + Stop Bits side by side -->
+                  <div class="rp-two-col">
+                    <div class="status-row">
+                      <label class="label" for="rp-data-bits">Data Bits</label>
+                      <select id="rp-data-bits" class="inline-input">
+                        <option value="7">7</option>
+                        <option value="8" selected>8</option>
+                      </select>
+                    </div>
+                    <div class="status-row">
+                      <label class="label" for="rp-stop-bits">Stop Bits</label>
+                      <select id="rp-stop-bits" class="inline-input">
+                        <option value="1" selected>1</option>
+                        <option value="2">2</option>
+                      </select>
+                    </div>
+                  </div>
+                  <!-- Flow Control + Parity side by side -->
+                  <div class="rp-two-col">
+                    <div class="status-row">
+                      <label class="label" for="rp-flow-control">Flow Control</label>
+                      <select id="rp-flow-control" class="inline-input">
+                        <option value="none" selected>None</option>
+                        <option value="hardware">Hardware</option>
+                        <option value="software">Software</option>
+                      </select>
+                    </div>
+                    <div class="status-row">
+                      <label class="label" for="rp-parity">Parity</label>
+                      <select id="rp-parity" class="inline-input">
+                        <option value="none" selected>None</option>
+                        <option value="even">Even</option>
+                        <option value="odd">Odd</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="status-row">
+                    <label class="label" for="rp-civ-address">CIV Address</label>
+                    <input id="rp-civ-address" class="inline-input" type="text" placeholder="94 (hex, Icom only)" />
+                  </div>
+                  <div class="status-row">
+                    <label class="label" for="rp-ptt-type">PTT Type</label>
+                    <select id="rp-ptt-type" class="inline-input">
+                      <option value="none" selected>None</option>
+                      <option value="cat">CAT</option>
+                      <option value="dtr">DTR</option>
+                      <option value="rts">RTS</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- FLRig fields -->
+                <div id="rp-flrig-fields" style="display:none">
+                  <div class="status-row">
+                    <label class="label" for="rp-flrig-host">Host</label>
+                    <input id="rp-flrig-host" class="inline-input" type="text" placeholder="127.0.0.1" />
+                  </div>
+                  <div class="status-row">
+                    <label class="label" for="rp-flrig-port">Port</label>
+                    <input id="rp-flrig-port" class="inline-input" type="number" min="1" max="65535" placeholder="12345" />
+                  </div>
+                </div>
+
+                <!-- External rigctld fields -->
+                <div id="rp-external-fields" style="display:none">
+                  <div class="status-row">
+                    <label class="label" for="rp-ext-host">Host</label>
+                    <input id="rp-ext-host" class="inline-input" type="text" placeholder="127.0.0.1" />
+                  </div>
+                  <div class="status-row">
+                    <label class="label" for="rp-ext-port">Port</label>
+                    <input id="rp-ext-port" class="inline-input" type="number" min="1" max="65535" placeholder="4532" />
+                  </div>
+                </div>
+
+                <!-- TCI fields -->
+                <div id="rp-tci-fields" style="display:none">
+                  <div class="status-row">
+                    <label class="label" for="rp-tci-host">Host</label>
+                    <input id="rp-tci-host" class="inline-input" type="text" placeholder="127.0.0.1" />
+                  </div>
+                  <div class="status-row">
+                    <label class="label" for="rp-tci-port">Port</label>
+                    <input id="rp-tci-port" class="inline-input" type="number" min="1" max="65535" placeholder="50001" />
+                  </div>
+                  <div class="status-row">
+                    <label class="label" for="rp-tci-receiver">Receiver</label>
+                    <select id="rp-tci-receiver" class="inline-input">
+                      <option value="0">RX1 (default)</option>
+                      <option value="1">RX2</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Poll interval (all types) -->
+                <div class="status-row">
+                  <label class="label" for="rp-poll-interval">Poll Interval (ms)</label>
+                  <input id="rp-poll-interval" class="inline-input" type="number" min="250" max="10000" step="250" placeholder="1000" />
+                </div>
+
+                <!-- Test result -->
+                <div id="rp-test-result" class="hint" style="display:none"></div>
+
+                <div class="card-actions">
+                  <button id="rp-save-btn">Save</button>
+                  <button id="rp-activate-btn">Use This Profile</button>
+                  <button id="rp-test-btn">Test Connection</button>
+                  <button id="rp-delete-btn" class="btn-danger">Delete</button>
+                </div>
+              </div>
+              <!-- Empty state -->
+              <div class="rig-profile-empty" id="rig-profile-empty">
+                <p>No profile selected. Add a profile or select one from the list.</p>
+              </div>
+            </div>
+          </div>
+
+        </section>
+      </div><!-- /tab-content-settings -->
+
+    </main>
+
+    <!-- ── Persistent status bar ──────────────────────────────────── -->
+    <footer class="status-bar" data-testid="status-bar">
+
+      <span class="status-item" data-testid="status-server">
+        <span class="status-dot" id="statusbar-server-dot"></span>
+        Server: <span id="statusbar-server-text">—</span>
+      </span>
+
+      <span class="status-sep">│</span>
+
+      <span class="status-item" data-testid="status-udp">
+        <span class="status-dot" id="statusbar-udp-dot"></span>
+        UDP: <span id="statusbar-udp-text">—</span>
+      </span>
+
+      <span class="status-sep">│</span>
+
+      <span class="status-item" data-testid="status-rig">
+        Rig:
+        <span id="statusbar-rig-freq">—</span>
+        <span id="statusbar-rig-mode">—</span>
+        <span id="statusbar-rig-band">—</span>
+      </span>
+
+      <span class="status-sep">│</span>
+
+      <span class="status-item">
+        Pending: <span id="statusbar-pending">—</span>
+        &nbsp;·&nbsp;
+        Sync: <span id="statusbar-last-sync">Never</span>
+      </span>
+
+    </footer>
+
+  </div><!-- /#app -->
+
+  <script type="module" src="main.ts"></script>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SETUP WIZARD OVERLAY
+       Hidden by default; shown when setup_complete is false.
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="wizard-overlay" class="wizard-overlay" style="display:none" role="dialog"
+       aria-modal="true" aria-labelledby="wizard-title">
+
+    <div class="wizard-card">
+
+      <!-- Progress indicator -->
+      <div class="wizard-progress" id="wizard-progress" role="progressbar"
+           aria-valuemin="1" aria-valuemax="8" aria-valuenow="1">
+        <div class="wizard-step-dot active" data-step="0"></div>
+        <div class="wizard-step-dot" data-step="1"></div>
+        <div class="wizard-step-dot" data-step="2"></div>
+        <div class="wizard-step-dot" data-step="3"></div>
+        <div class="wizard-step-dot" data-step="4"></div>
+        <div class="wizard-step-dot" data-step="5"></div>
+        <div class="wizard-step-dot" data-step="6"></div>
+        <div class="wizard-step-dot" data-step="7"></div>
+      </div>
+
+      <!-- ── Step 0: Welcome ─────────────────────────────────────── -->
+      <div id="wizard-step-0" class="wizard-step active">
+        <div class="wizard-icon"><img src="assets/logo-all-white.png" alt="RadioLedger" style="height: 48px;" /></div>
+        <h2 id="wizard-title" class="wizard-heading">Welcome to RadioLedger</h2>
+        <p class="wizard-desc">
+          Let's get your ham radio logging station set up in a few easy steps.
+          This wizard will help you configure:
+        </p>
+        <ul class="wizard-feature-list">
+          <li>🔐 Secure login to your RadioLedger account</li>
+          <li>☁️ Download your existing logbook from the cloud</li>
+          <li>📡 Detect WSJT-X, JS8Call, and N1MM+ software</li>
+          <li>🔌 Configure UDP listeners for digital modes</li>
+          <li>🏆 Set up LoTW automatic upload signing</li>
+          <li>🎛️ Configure rig control (Flrig / Hamlib)</li>
+        </ul>
+        <p class="wizard-hint">You can skip optional steps and configure them later in Settings.</p>
+        <div class="wizard-nav">
+          <span></span>
+          <button id="wizard-start-btn" class="wizard-btn-primary">Get Started →</button>
+        </div>
+      </div>
+
+      <!-- ── Step 1: Login ───────────────────────────────────────── -->
+      <div id="wizard-step-1" class="wizard-step">
+        <div class="wizard-icon">🔐</div>
+        <h2 class="wizard-heading">Connect to RadioLedger</h2>
+
+        <!-- Mode toggle -->
+        <div class="wizard-auth-toggle">
+          <button id="wizard-auth-cloud-btn" class="wizard-toggle-btn active">☁️ RadioLedger Cloud</button>
+          <button id="wizard-auth-local-btn" class="wizard-toggle-btn">🏠 Self-Hosted</button>
+        </div>
+
+        <!-- Cloud mode (OAuth2 PKCE) -->
+        <div id="wizard-auth-cloud" class="wizard-auth-panel">
+          <p class="wizard-desc">Sign in with your RadioLedger account via secure browser login.</p>
+          <div id="wizard-login-status" class="wizard-status-box">
+            <span id="wizard-login-indicator" class="wizard-status-dot wizard-dot-idle"></span>
+            <span id="wizard-login-text">Click "Open Browser" to sign in.</span>
+          </div>
+          <div id="wizard-login-user" class="wizard-callsign-box" style="display:none">
+            <span class="wizard-callsign-label">Signed in as:</span>
+            <span id="wizard-login-callsign" class="wizard-callsign-value">—</span>
+          </div>
+          <div class="wizard-nav">
+            <button id="wizard-step1-back" class="wizard-btn-secondary">← Back</button>
+            <div style="display:flex;gap:8px">
+              <button id="wizard-login-btn" class="wizard-btn-primary">Open Browser</button>
+              <button id="wizard-step1-skip" class="wizard-btn-ghost">Skip</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Local/self-hosted mode (email + password) -->
+        <div id="wizard-auth-local" class="wizard-auth-panel" style="display:none">
+          <p class="wizard-desc">Connect to your own RadioLedger server.</p>
+          <div class="wizard-form-group">
+            <label for="wizard-server-url">Server URL</label>
+            <input id="wizard-server-url" type="url"
+                   placeholder="https://my-radioledger.example.com" value="" />
+          </div>
+          <div class="wizard-form-group">
+            <label for="wizard-local-email">Email</label>
+            <input id="wizard-local-email" type="email" placeholder="you@example.com" />
+          </div>
+          <div class="wizard-form-group">
+            <label for="wizard-local-password">Password</label>
+            <input id="wizard-local-password" type="password" placeholder="Password" />
+          </div>
+          <div class="wizard-status-line" id="wizard-local-login-status"></div>
+          <div class="wizard-nav">
+            <button id="wizard-step1-local-back" class="wizard-btn-secondary">← Back</button>
+            <div style="display:flex;gap:8px">
+              <button id="wizard-local-login-btn" class="wizard-btn-primary">Connect</button>
+              <button id="wizard-step1-local-skip" class="wizard-btn-ghost">Skip</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step 2: Server Sync ─────────────────────────────────── -->
+      <div id="wizard-step-2" class="wizard-step">
+        <div class="wizard-icon">☁️</div>
+        <h2 class="wizard-heading">Download Your Logbook</h2>
+        <p class="wizard-desc">
+          Pull your existing QSO history from the RadioLedger server so you're
+          immediately working with your full logbook.
+        </p>
+        <div id="wizard-sync-status" class="wizard-status-box">
+          <span id="wizard-sync-indicator" class="wizard-status-dot wizard-dot-idle"></span>
+          <span id="wizard-sync-text">Click "Sync Now" to download your logbook.</span>
+        </div>
+        <div class="wizard-nav">
+          <button id="wizard-step2-back" class="wizard-btn-secondary">← Back</button>
+          <div style="display:flex;gap:8px">
+            <button id="wizard-sync-btn" class="wizard-btn-primary">Sync Now</button>
+            <button id="wizard-step2-skip" class="wizard-btn-ghost">Skip</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step 3: Detect Software ─────────────────────────────── -->
+      <div id="wizard-step-3" class="wizard-step">
+        <div class="wizard-icon">🔍</div>
+        <h2 class="wizard-heading">Detect Ham Software</h2>
+        <p class="wizard-desc">
+          RadioLedger will scan for running amateur radio software on your
+          computer's common ports.
+        </p>
+        <div id="wizard-detect-status" class="wizard-status-box">
+          <span id="wizard-detect-indicator" class="wizard-status-dot wizard-dot-idle"></span>
+          <span id="wizard-detect-text">Click "Scan" to probe common ports.</span>
+        </div>
+        <div id="wizard-detect-results" class="wizard-detect-results" style="display:none">
+          <div class="wizard-detect-row">
+            <span id="wizard-detect-wsjtx-icon" class="wizard-detect-icon">⬜</span>
+            <span class="wizard-detect-name">WSJT-X</span>
+            <span id="wizard-detect-wsjtx-note" class="wizard-detect-note">—</span>
+          </div>
+          <div class="wizard-detect-row">
+            <span id="wizard-detect-js8call-icon" class="wizard-detect-icon">⬜</span>
+            <span class="wizard-detect-name">JS8Call</span>
+            <span id="wizard-detect-js8call-note" class="wizard-detect-note">—</span>
+          </div>
+          <div class="wizard-detect-row">
+            <span id="wizard-detect-n1mm-icon" class="wizard-detect-icon">⬜</span>
+            <span class="wizard-detect-name">N1MM+</span>
+            <span id="wizard-detect-n1mm-note" class="wizard-detect-note">—</span>
+          </div>
+          <div class="wizard-detect-row">
+            <span id="wizard-detect-flrig-icon" class="wizard-detect-icon">⬜</span>
+            <span class="wizard-detect-name">Flrig</span>
+            <span id="wizard-detect-flrig-note" class="wizard-detect-note">—</span>
+          </div>
+          <div class="wizard-detect-row">
+            <span id="wizard-detect-rigctld-icon" class="wizard-detect-icon">⬜</span>
+            <span class="wizard-detect-name">Hamlib (rigctld)</span>
+            <span id="wizard-detect-rigctld-note" class="wizard-detect-note">—</span>
+          </div>
+          <div id="wizard-detect-rigctld-install" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg-card,#f5f5f5);border-radius:6px;font-size:0.88em;line-height:1.5">
+            <div id="wizard-detect-rigctld-hint" style="margin-bottom:6px;color:var(--text-primary,#222)"></div>
+            <a href="https://github.com/Hamlib/Hamlib/releases" target="_blank" rel="noopener noreferrer"
+               style="color:var(--accent,#2563eb);text-decoration:underline">
+              Hamlib releases on GitHub ↗
+            </a>
+            <div style="margin-top:6px;color:var(--text-muted,#666);font-style:italic">
+              Not needed if you only use FLRig or TCI for rig control.
+            </div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button id="wizard-step3-back" class="wizard-btn-secondary">← Back</button>
+          <div style="display:flex;gap:8px">
+            <button id="wizard-scan-btn" class="wizard-btn-primary">Scan</button>
+            <button id="wizard-step3-next" class="wizard-btn-ghost">Next →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step 4: Configure UDP ───────────────────────────────── -->
+      <div id="wizard-step-4" class="wizard-step">
+        <div class="wizard-icon">📡</div>
+        <h2 class="wizard-heading">Configure UDP Listeners</h2>
+        <p class="wizard-desc">
+          Enable UDP listeners for the logging software you use.
+          Ports are pre-filled from the software detection step.
+        </p>
+        <div class="wizard-udp-config">
+          <!-- WSJT-X -->
+          <div class="wizard-udp-row">
+            <label class="wizard-udp-label">
+              <input type="checkbox" id="wiz-wsjtx-enabled" class="wizard-checkbox" />
+              WSJT-X
+            </label>
+            <div class="wizard-udp-port-row">
+              <span class="wizard-port-label">Port</span>
+              <input id="wiz-wsjtx-port" type="number" class="wizard-port-input"
+                     min="1024" max="65535" value="2237" />
+            </div>
+          </div>
+          <!-- JS8Call -->
+          <div class="wizard-udp-row">
+            <label class="wizard-udp-label">
+              <input type="checkbox" id="wiz-js8call-enabled" class="wizard-checkbox" />
+              JS8Call
+            </label>
+            <div class="wizard-udp-port-row">
+              <span class="wizard-port-label">Port</span>
+              <input id="wiz-js8call-port" type="number" class="wizard-port-input"
+                     min="1024" max="65535" value="2242" />
+            </div>
+          </div>
+          <!-- N1MM+ -->
+          <div class="wizard-udp-row">
+            <label class="wizard-udp-label">
+              <input type="checkbox" id="wiz-n1mm-enabled" class="wizard-checkbox" />
+              N1MM+
+            </label>
+            <div class="wizard-udp-port-row">
+              <span class="wizard-port-label">Port</span>
+              <input id="wiz-n1mm-port" type="number" class="wizard-port-input"
+                     min="1024" max="65535" value="12060" />
+            </div>
+          </div>
+        </div>
+        <p class="wizard-hint">Bind address is always 127.0.0.1 (loopback) for security.</p>
+        <div class="wizard-nav">
+          <button id="wizard-step4-back" class="wizard-btn-secondary">← Back</button>
+          <div style="display:flex;gap:8px">
+            <button id="wizard-step4-next" class="wizard-btn-primary">Next →</button>
+            <button id="wizard-step4-skip" class="wizard-btn-ghost">Skip</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step 5: LoTW Setup ──────────────────────────────────── -->
+      <div id="wizard-step-5" class="wizard-step">
+        <div class="wizard-icon">🏆</div>
+        <h2 class="wizard-heading">LoTW Setup</h2>
+        <p class="wizard-desc">
+          RadioLedger can automatically sign and upload QSOs to Logbook of the World
+          (LoTW) using your locally installed tQSL.
+        </p>
+        <div id="wizard-lotw-status" class="wizard-status-box">
+          <span id="wizard-lotw-indicator" class="wizard-status-dot wizard-dot-idle"></span>
+          <span id="wizard-lotw-text">Click "Detect tQSL" to find your installation.</span>
+        </div>
+        <div id="wizard-lotw-form" class="wizard-lotw-form" style="display:none">
+          <div class="wizard-form-row">
+            <label class="wizard-form-label" for="wiz-lotw-path">tQSL Path</label>
+            <input id="wiz-lotw-path" type="text" class="wizard-form-input" placeholder="Auto-detected" readonly />
+          </div>
+          <div class="wizard-form-row">
+            <label class="wizard-form-label" for="wiz-lotw-location">Station Location</label>
+            <input id="wiz-lotw-location" type="text" class="wizard-form-input"
+                   placeholder="e.g. HOME" />
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button id="wizard-step5-back" class="wizard-btn-secondary">← Back</button>
+          <div style="display:flex;gap:8px">
+            <button id="wizard-lotw-detect-btn" class="wizard-btn-primary">Detect tQSL</button>
+            <button id="wizard-step5-skip" class="wizard-btn-ghost">Skip</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step 6: Rig Control ─────────────────────────────────── -->
+      <div id="wizard-step-6" class="wizard-step">
+        <div class="wizard-icon">🎛️</div>
+        <h2 class="wizard-heading">Rig Control</h2>
+        <p class="wizard-desc">
+          Connect RadioLedger to your transceiver for real-time frequency and
+          mode tracking via Flrig or Hamlib (rigctld).
+        </p>
+        <div id="wizard-rig-status" class="wizard-status-box">
+          <span id="wizard-rig-indicator" class="wizard-status-dot wizard-dot-idle"></span>
+          <span id="wizard-rig-text">No rig connection detected.</span>
+        </div>
+        <div class="wizard-rig-config">
+          <div class="wizard-form-row">
+            <label class="wizard-form-label" for="wiz-rig-method">Method</label>
+            <select id="wiz-rig-method" class="wizard-form-select">
+              <option value="none">Disabled</option>
+              <option value="flrig">Flrig (port 12345)</option>
+              <option value="hamlib">Hamlib rigctld (port 4532)</option>
+            </select>
+          </div>
+          <div class="wizard-form-row">
+            <label class="wizard-form-label" for="wiz-rig-host">Host</label>
+            <input id="wiz-rig-host" type="text" class="wizard-form-input" value="127.0.0.1" />
+          </div>
+          <div class="wizard-form-row">
+            <label class="wizard-form-label" for="wiz-rig-flrig-port">Flrig Port</label>
+            <input id="wiz-rig-flrig-port" type="number" class="wizard-form-input" value="12345" />
+          </div>
+          <div class="wizard-form-row">
+            <label class="wizard-form-label" for="wiz-rig-rigctld-port">Hamlib Port</label>
+            <input id="wiz-rig-rigctld-port" type="number" class="wizard-form-input" value="4532" />
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button id="wizard-step6-back" class="wizard-btn-secondary">← Back</button>
+          <div style="display:flex;gap:8px">
+            <button id="wizard-rig-test-btn" class="wizard-btn-primary">Test Connection</button>
+            <button id="wizard-step6-skip" class="wizard-btn-ghost">Skip</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Step 7: Summary / Done ──────────────────────────────── -->
+      <div id="wizard-step-7" class="wizard-step">
+        <div class="wizard-icon">✅</div>
+        <h2 class="wizard-heading">You're All Set!</h2>
+        <p class="wizard-desc">
+          RadioLedger has been configured and is ready to log your QSOs.
+        </p>
+        <div id="wizard-summary" class="wizard-summary">
+          <!-- Populated by JS -->
+        </div>
+        <div class="wizard-hint" style="margin-top:16px">
+          💡 A system tray icon (📻) lets you quickly access RadioLedger anytime.
+          You can revisit these settings at any time from the Settings tab.
+        </div>
+        <div class="wizard-nav" style="margin-top:24px">
+          <button id="wizard-step7-back" class="wizard-btn-secondary">← Back</button>
+          <button id="wizard-finish-btn" class="wizard-btn-primary">
+            Finish Setup 🎉
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /.wizard-card -->
+  </div><!-- /#wizard-overlay -->
+</body>
+</html>

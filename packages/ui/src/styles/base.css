@@ -1,0 +1,93 @@
+/* RadioLedger base reset + typography */
+@import './variables.css';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--rl-bg);
+  color: var(--rl-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--rl-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--rl-text);
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  background: var(--rl-surface);
+  color: var(--rl-text);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--rl-radius);
+  padding: 8px 12px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--rl-accent);
+}
+
+button {
+  background: var(--rl-surface-2);
+  color: var(--rl-text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--rl-radius);
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+button:hover {
+  background: var(--rl-accent);
+  border-color: var(--rl-accent);
+}
+
+button:active {
+  opacity: 0.8;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rl-card {
+  background: var(--rl-surface);
+  border-radius: var(--rl-radius);
+  border: 1px solid var(--rl-surface-2);
+  padding: 20px;
+}
+
+.rl-btn-primary {
+  background: var(--rl-accent);
+  border-color: var(--rl-accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 20px;
+}
+
+.rl-btn-primary:hover {
+  background: #c73050;
+  border-color: #c73050;
+}

@@ -1,0 +1,16 @@
+{
+  "name": "radioledger-docs",
+  "version": "1.0.0",
+  "description": "RadioLedger documentation site",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev .",
+    "docs:build": "vitepress build .",
+    "docs:preview": "vitepress preview ."
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.3"
+  }
+}

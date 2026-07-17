@@ -1,0 +1,5 @@
+node_modules/
+.pnpm-store/
+api/server
+api/bin/
+desktop/vite.config.local.js

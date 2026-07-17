@@ -1,0 +1,70 @@
+# RadioLedger
+> The open-source ledger for radio amateurs
+
+## About
+RadioLedger is an open-source ham radio logging platform for self-hosting with Docker Compose.
+License: AGPLv3. Built with Go (API), PostgreSQL + PostGIS (database), and Chart.js (statistics).
+
+## Docs
+- [Getting Started](https://docs.radioledger.app/getting-started)
+- [Self-Hosting Guide](https://docs.radioledger.app/self-hosting)
+- [Docker Setup](https://docs.radioledger.app/self-hosting/docker-setup)
+- [API Reference](https://docs.radioledger.app/api)
+- [Desktop Client Setup](https://docs.radioledger.app/desktop)
+- [Mobile App](https://docs.radioledger.app/mobile)
+- [ADIF Import/Export](https://docs.radioledger.app/user-guide/import-export)
+- [Callsign Databases](https://docs.radioledger.app/CALLSIGN_DATABASE_SPEC)
+- [LoTW Sync](https://docs.radioledger.app/sync/lotw)
+- [QRZ Logbook Sync](https://docs.radioledger.app/sync/qrz)
+- [eQSL Sync](https://docs.radioledger.app/sync/eqsl)
+- [ClubLog Sync](https://docs.radioledger.app/sync/clublog)
+- [POTA Logging](https://docs.radioledger.app/sync/pota)
+- [SOTA Logging](https://docs.radioledger.app/sync/sota)
+- [Awards Tracking](https://docs.radioledger.app/user-guide/awards-tracking)
+- [Statistics Dashboard](https://docs.radioledger.app/user-guide/statistics)
+- [WSJT-X Auto-Logging](https://docs.radioledger.app/desktop/wsjtx-setup)
+- [Contest Logging](https://docs.radioledger.app/contest)
+- [Security Posture](https://docs.radioledger.app/security)
+- [FAQ](https://docs.radioledger.app/faq)
+
+## API
+OpenAPI spec: https://docs.radioledger.app/api/openapi.json
+Base URL (self-hosted): http://localhost:8080/v1
+Authentication: Bearer token (API key or OAuth2 access token)
+Stream Security: Short-lived, single-use stream tokens for SSE connections
+All responses use: {success, data, message, error} envelope
+
+## Quick Start (Self-Hosted)
+```bash
+git clone https://github.com/FtlC-ian/radioledger.git
+cd radioledger/docker
+./init.sh
+docker compose up -d
+# Web UI at http://localhost:3000
+# API at http://localhost:8080
+```
+
+## Key Features
+- **QSO Logging**: Full ADIF field support and semantic-lossless round-trip import/export.
+- **Callsign Databases**: Local cache of 9 countries (1.5M records) with daily FCC sync.
+- **Sync Services**: LoTW, QRZ, eQSL, ClubLog, POTA, SOTA with background retry and circuit breakers.
+- **Awards Tracking**: Real-time progress for DXCC, WAS, VUCC, WAZ, WPX, POTA, SOTA.
+- **Statistics**: Chart.js visualizations, activity heatmaps, and trend analytics.
+- **Admin Dashboard**: Visibility into River background jobs and callsign sync status.
+- **Desktop Client**: macOS, Windows, Linux client with LoTW signing and UDP auto-logging.
+- **Mobile App**: Offline-first POTA/SOTA activation mode.
+- **Security**: Public security posture docs, RLS tenant isolation, scoped API keys, desktop-local LoTW signing, and encrypted external-service credential storage.
+
+## LoTW Setup (Important)
+LoTW uses desktop-local signing through tQSL, keeping certificate material on the operator's computer.
+Install desktop client → run setup wizard → select tQSL certificate → enable desktop-local upload.
+
+## Tech Stack
+- API: Go, chi router, sqlc, pgx/v5, River (job queue)
+- Database: PostgreSQL 17 + PostGIS 3.5
+- Auth: Zitadel (OIDC/OAuth2, multi-tenant)
+- Desktop: Tauri (Rust + web frontend)
+- License: AGPLv3
+
+## Source Code
+https://github.com/FtlC-ian/radioledger

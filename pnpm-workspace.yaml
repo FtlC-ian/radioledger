@@ -1,0 +1,28 @@
+packages:
+  - packages/*
+  - desktop
+  - web
+  - docs
+  - site
+  - e2e
+
+overrides:
+  form-data@4.0.5: 4.0.6
+
+onlyBuiltDependencies:
+  - "@parcel/watcher"
+  - chromedriver
+  - core-js
+  - edgedriver
+  - esbuild
+  - geckodriver
+  - sharp
+
+allowBuilds:
+  "@parcel/watcher": true
+  chromedriver: true
+  core-js: true
+  edgedriver: true
+  esbuild: true
+  geckodriver: true
+  sharp: true

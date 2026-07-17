@@ -1,0 +1,62 @@
+# LoTW Signing Vault — network-isolated, no internet access.
+#
+# The vault intentionally has NO external network access. It can only be
+# reached by services on the vault-internal network (e.g. the RadioLedger
+# API). All outbound calls to lotw.arrl.org are handled by the main API,
+# not the vault.
+
+services:
+  lotw-vault:
+    build: .
+    image: radioledger/lotw-vault:0.1.0
+    restart: unless-stopped
+
+    # NO exposed ports — the vault is only reachable via the internal network.
+    # The main RadioLedger API (on vault-internal) communicates directly.
+    ports: []
+
+    networks:
+      - vault-internal
+
+    volumes:
+      - radioledger_vault_data:/data
+
+    environment:
+      # Required: vault listen address (no TLS; terminated at API gateway).
+      - VAULT_ADDR=:8080
+
+    command: ["-addr", ":8080", "-db", "/data/certs.db"]
+
+    security_opt:
+      - no-new-privileges:true
+
+    read_only: true
+
+    tmpfs:
+      - /tmp:size=10M
+
+    cap_drop:
+      - ALL
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+
+networks:
+  vault-internal:
+    # internal: true means no external (internet) routing is possible.
+    # Containers on this network cannot reach the public internet.
+    internal: true
+
+volumes:
+  radioledger_vault_data:
+    driver: local

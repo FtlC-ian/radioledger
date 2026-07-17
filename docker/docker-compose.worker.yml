@@ -1,0 +1,63 @@
+# docker-compose.worker.yml — Worker process override
+#
+# Use this file when you want to run the RadioLedger worker on a separate
+# host from the API server (e.g. a dedicated job-processing machine or a
+# scaled-out worker fleet).
+#
+# Usage (on the worker host):
+#
+#   # Pull the pre-built image from your registry first:
+#   docker pull ghcr.io/your-org/radioledger/api:0.1.0
+#
+#   # Then bring up just the worker:
+#   docker compose -f docker-compose.yml -f docker-compose.worker.yml \
+#     up -d worker
+#
+# Or standalone (if you only need the worker on this host):
+#
+#   docker compose -f docker-compose.worker.yml up -d
+#
+# The worker connects to an external DB and exposes metrics on :2112.
+# Make sure DATABASE_URL and RADIOLEDGER_MASTER_KEY are set in .env or
+# passed as environment variables.
+
+name: radioledger-worker
+
+services:
+  worker:
+    image: ${WORKER_IMAGE:-radioledger/api:0.1.0}
+    command: ["--mode=worker"]
+    restart: unless-stopped
+    environment:
+      # Required: database connection string for external/remote DB.
+      DATABASE_URL: ${DATABASE_URL}
+      # Required: master encryption key for at-rest secrets.
+      RADIOLEDGER_MASTER_KEY: ${RADIOLEDGER_MASTER_KEY}
+      # Must agree with the mounted /tmp/radioledger volume below.
+      RADIOLEDGER_IMPORT_TMPDIR: /tmp/radioledger
+      APP_ENV: ${APP_ENV:-production}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_FORMAT: json
+      AUTH_MODE: ${AUTH_MODE:-dev}
+      ZITADEL_URL: ${ZITADEL_URL:-}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-radioledger-worker}
+      OTEL_EXPORTER: ${OTEL_EXPORTER:-noop}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    # Expose metrics port for Prometheus scraping.
+    # In a multi-host setup, configure Prometheus to scrape <host>:2112.
+    ports:
+      - "127.0.0.1:2112:2112"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:2112/metrics"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp/radioledger:mode=1777,size=512m
+      - /tmp:mode=1777,size=64m

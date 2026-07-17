@@ -1,0 +1,5 @@
+WSJT-X ADIF Export<eoh>
+
+<call:5>K1ABC<gridsquare:4>FN42<mode:3>FT8<rst_sent:3>-10<rst_rcvd:3>-15<qso_date:8>20260228<time_on:6>010215<qso_date_off:8>20260228<time_off:6>010230<band:3>20m<freq:8>14.07401<station_callsign:5>W5REX<my_gridsquare:6>EM35ab<tx_pwr:1>5<comment:14>FT8 via WSJT-X<eor>
+<call:5>G3ZZZ<gridsquare:4>IO91<mode:3>FT8<rst_sent:3>-05<rst_rcvd:3>-08<qso_date:8>20260228<time_on:6>012345<qso_date_off:8>20260228<time_off:6>012400<band:3>20m<freq:8>14.07450<station_callsign:5>W5REX<my_gridsquare:6>EM35ab<eor>
+<call:5>JA1XX<gridsquare:4>PM95<mode:3>FT8<rst_sent:3>-12<rst_rcvd:3>-20<qso_date:8>20260228<time_on:6>020000<band:3>15m<freq:8>21.07401<station_callsign:5>W5REX<eor>

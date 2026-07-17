@@ -1,0 +1,16 @@
+# Build output
+node_modules/
+dist/
+src-tauri/target/
+
+# Generated
+src-tauri/WixTools/
+*.dmg
+*.AppImage
+*.deb
+*.msi
+*.exe
+*.app
+
+# Local config (never commit)
+.env

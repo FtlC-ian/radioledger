@@ -1,0 +1,49 @@
+# RadioLedger — Development override
+#
+# Extends docker-compose.yml with developer-friendly settings:
+#   - Exposes DB port 5432 on localhost for direct psql/DBeaver access
+#   - Mounts API source for faster iteration (rebuild for Go changes)
+#   - Adds pgAdmin for browser-based DB inspection
+#   - Switches logging to text format for easier terminal reading
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+services:
+  db:
+    ports:
+      # Expose DB to the host for direct access — DEV ONLY, never in prod
+      - "5432:5432"
+
+  api:
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: debug
+      LOG_FORMAT: text
+      OTEL_EXPORTER: otlp
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+    # In development, relax read-only FS for debug output
+    read_only: false
+
+  # ── pgAdmin — browser-based PostgreSQL GUI ───────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:9.3
+    restart: unless-stopped
+    environment:
+      # Optional: override pgAdmin login credentials (defaults shown).
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@radioledger.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - radioledger_net
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgadmin_data:
+    driver: local

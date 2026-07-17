@@ -1,0 +1,16 @@
+/* RadioLedger design tokens */
+:root {
+  --rl-bg: #1a1a2e;
+  --rl-surface: #16213e;
+  --rl-surface-2: #0f3460;
+  --rl-accent: #e94560;
+  --rl-text: #eaeaea;
+  --rl-text-dim: #9a9a9a;
+  --rl-success: #4caf50;
+  --rl-warning: #ff9800;
+  --rl-error: #f44336;
+  --rl-radius: 8px;
+  --rl-chart-blue: #4fc3f7;
+  --rl-chart-green: #66bb6a;
+  --rl-chart-palette: #ef5350, #ab47bc, #42a5f5, #66bb6a, #ffca28, #26c6da, #ff7043;
+}
